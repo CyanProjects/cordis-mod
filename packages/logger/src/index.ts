@@ -91,20 +91,9 @@ class Logger extends Service {
   }
 
   static {
-<<<<<<< HEAD
-    for (
-      const type of ['success', 'error', 'info', 'warn', 'debug', 'extend']
-    ) {
-      LoggerService.prototype[type] = function (
-        this: LoggerService,
-        ...args: any[]
-      ) {
-        let config: LoggerService.Config = {}
-=======
     for (const type of ['success', 'error', 'info', 'warn', 'debug']) {
       Logger.prototype[type] = function (this: Logger, ...args: any[]) {
         let config: Logger.Intercept = {}
->>>>>>> ccc3919 (refa: logger)
         let intercept = this.ctx[Context.intercept]
         while (intercept) {
           config = Object.assign({}, intercept.logger, config)

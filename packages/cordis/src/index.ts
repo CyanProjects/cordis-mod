@@ -1,4 +1,3 @@
-import {} from '@cordisjs/loader'
 import {} from '@cordisjs/logger'
 
 export * from '@cordisjs/core'
