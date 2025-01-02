@@ -1,6 +1,6 @@
 import { Awaitable, defineProperty } from 'cosmokit'
-import { Context } from './context'
-import { createCallable, joinPrototype, symbols, Tracker } from './utils'
+import { Context } from './context.ts'
+import { createCallable, joinPrototype, symbols, Tracker } from './utils.ts'
 
 export abstract class Service<C extends Context = Context> {
   static readonly check: unique symbol = symbols.check as any

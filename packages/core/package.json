@@ -4,18 +4,14 @@
   "version": "4.0.0-alpha.0",
   "sideEffects": false,
   "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "src/index.ts",
   "exports": {
-    ".": {
-      "types": "./lib/index.d.ts",
-      "default": "./lib/index.js"
-    },
+    ".": "./src/index.ts",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
-    "lib"
+    "src"
   ],
   "repository": {
     "type": "git",

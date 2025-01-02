@@ -34,6 +34,7 @@ export interface LoggerService extends Pick<Logger, Logger.Type | 'extend'> {
 
 export class LoggerService extends Service {
   constructor(ctx: Context) {
+    ctx.provide('logger', undefined, true)
     super(ctx, 'logger')
     const self = this
 

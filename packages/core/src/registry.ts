@@ -1,7 +1,7 @@
 import { defineProperty, Dict } from 'cosmokit'
-import { Context } from './context'
-import { EffectScope } from './scope'
-import { DisposableList, symbols, withProps } from './utils'
+import { Context } from './context.ts'
+import { EffectScope } from './scope.ts'
+import { DisposableList, symbols, withProps } from './utils.ts'
 
 function isApplicable(object: Plugin) {
   return object && typeof object === 'object' && typeof object.apply === 'function'
@@ -97,7 +97,7 @@ export function resolveConfig(runtime: Plugin.Runtime, config: any) {
 
 export type Spread<T> = undefined extends T ? [config?: T] : [config: T]
 
-declare module './context' {
+declare module './context.ts' {
   export interface Context {
     inject(deps: Inject, callback: Plugin.Function<this, void>): EffectScope<this>
     plugin<T = undefined, S = T>(plugin: Plugin.Function<this, T> & Plugin.Transform<S, T>, ...args: Spread<S>): EffectScope<this>

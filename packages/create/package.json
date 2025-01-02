@@ -3,11 +3,10 @@
   "description": "Setup a Cordis application",
   "version": "0.2.4",
   "type": "module",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "bin": "lib/bin.js",
+  "main": "src/index.ts",
+  "bin": "src/bin.ts",
   "files": [
-    "lib"
+    "src"
   ],
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",

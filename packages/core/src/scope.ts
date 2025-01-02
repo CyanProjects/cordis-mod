@@ -1,9 +1,9 @@
 import { Dict, isNullable } from 'cosmokit'
-import { Context } from './context'
-import { Inject, Plugin, resolveConfig } from './registry'
-import { composeError, DisposableList, isConstructor, symbols } from './utils'
+import { Context } from './context.ts'
+import { Inject, Plugin, resolveConfig } from './registry.ts'
+import { composeError, DisposableList, isConstructor, symbols } from './utils.ts'
 
-declare module './context' {
+declare module './context.ts' {
   export interface Context {
     scope: EffectScope<this>
     effect(callback: Effect): () => Promise<void>

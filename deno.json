@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "strict": false
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-ban-types"]
+    }
+  }
+}

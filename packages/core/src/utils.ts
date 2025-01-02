@@ -1,5 +1,5 @@
 import { defineProperty } from 'cosmokit'
-import type { Context, Service } from '.'
+import type { Context, Service } from './index.ts'
 
 export class DisposableList<T> {
   private sn = 0

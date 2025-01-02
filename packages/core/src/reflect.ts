@@ -1,9 +1,9 @@
 import { defineProperty, Dict, isNullable } from 'cosmokit'
-import { Context } from './context'
-import { getTraceable, isObject, isUnproxyable, symbols, withProps } from './utils'
-import { EffectScope, ScopeStatus } from './scope'
+import { Context } from './context.ts'
+import { getTraceable, isObject, isUnproxyable, symbols, withProps } from './utils.ts'
+import { EffectScope, ScopeStatus } from './scope.ts'
 
-declare module './context' {
+declare module './context.ts' {
   interface Context {
     get<K extends string & keyof this>(name: K, strict?: boolean): undefined | this[K]
     get(name: string, strict?: boolean): any
