@@ -4,7 +4,8 @@ import { EffectScope } from './scope.ts'
 import { DisposableList, symbols, withProps } from './utils.ts'
 
 function isApplicable(object: Plugin) {
-  return object && typeof object === 'object' && typeof object.apply === 'function'
+  return object && typeof object === 'object' &&
+    typeof object.apply === 'function'
 }
 
 function buildOuterStack() {
@@ -15,7 +16,10 @@ function buildOuterStack() {
 export type Inject = string[] | Dict<Inject.Meta>
 
 export function Inject(inject: Inject) {
-  return function (value: any, decorator: ClassDecoratorContext<any> | ClassMethodDecoratorContext<any>) {
+  return function (
+    value: any,
+    decorator: ClassDecoratorContext<any> | ClassMethodDecoratorContext<any>,
+  ) {
     if (decorator.kind === 'class') {
       value.inject = inject
     } else if (decorator.kind === 'method') {
@@ -23,7 +27,7 @@ export function Inject(inject: Inject) {
         const property = this[symbols.tracker]?.property
         if (!property) throw new Error('missing context tracker')
         ;(this[symbols.initHooks] ??= []).push(() => {
-          (this[property] as Context).inject(inject, (ctx) => {
+          ;(this[property] as Context).inject(inject, (ctx) => {
             value.call(withProps(this, { [property]: ctx }))
           })
         })
@@ -43,7 +47,9 @@ export namespace Inject {
   export function resolve(inject: Inject | null | undefined) {
     if (!inject) return {}
     if (Array.isArray(inject)) {
-      return Object.fromEntries(inject.map(name => [name, { required: true }]))
+      return Object.fromEntries(
+        inject.map((name) => [name, { required: true }]),
+      )
     }
     return inject
   }
@@ -68,15 +74,18 @@ export namespace Plugin {
     Config: (config: S) => T
   }
 
-  export interface Function<C extends Context = Context, T = any> extends Base<T> {
+  export interface Function<C extends Context = Context, T = any>
+    extends Base<T> {
     (ctx: C, config: T): void | Promise<void>
   }
 
-  export interface Constructor<C extends Context = Context, T = any> extends Base<T> {
+  export interface Constructor<C extends Context = Context, T = any>
+    extends Base<T> {
     new (ctx: C, config: T): any
   }
 
-  export interface Object<C extends Context = Context, T = any> extends Base<T> {
+  export interface Object<C extends Context = Context, T = any>
+    extends Base<T> {
     apply: (ctx: C, config: T) => void | Promise<void>
   }
 
@@ -99,13 +108,34 @@ export type Spread<T> = undefined extends T ? [config?: T] : [config: T]
 
 declare module './context.ts' {
   export interface Context {
-    inject(deps: Inject, callback: Plugin.Function<this, void>): EffectScope<this>
-    plugin<T = undefined, S = T>(plugin: Plugin.Function<this, T> & Plugin.Transform<S, T>, ...args: Spread<S>): EffectScope<this>
-    plugin<T = undefined, S = T>(plugin: Plugin.Constructor<this, T> & Plugin.Transform<S, T>, ...args: Spread<S>): EffectScope<this>
-    plugin<T = undefined, S = T>(plugin: Plugin.Object<this, T> & Plugin.Transform<S, T>, ...args: Spread<S>): EffectScope<this>
-    plugin<T = undefined>(plugin: Plugin.Function<this, T>, ...args: Spread<T>): EffectScope<this>
-    plugin<T = undefined>(plugin: Plugin.Constructor<this, T>, ...args: Spread<T>): EffectScope<this>
-    plugin<T = undefined>(plugin: Plugin.Object<this, T>, ...args: Spread<T>): EffectScope<this>
+    inject(
+      deps: Inject,
+      callback: Plugin.Function<this, void>,
+    ): EffectScope<this>
+    plugin<T = undefined, S = T>(
+      plugin: Plugin.Function<this, T> & Plugin.Transform<S, T>,
+      ...args: Spread<S>
+    ): EffectScope<this>
+    plugin<T = undefined, S = T>(
+      plugin: Plugin.Constructor<this, T> & Plugin.Transform<S, T>,
+      ...args: Spread<S>
+    ): EffectScope<this>
+    plugin<T = undefined, S = T>(
+      plugin: Plugin.Object<this, T> & Plugin.Transform<S, T>,
+      ...args: Spread<S>
+    ): EffectScope<this>
+    plugin<T = undefined>(
+      plugin: Plugin.Function<this, T>,
+      ...args: Spread<T>
+    ): EffectScope<this>
+    plugin<T = undefined>(
+      plugin: Plugin.Constructor<this, T>,
+      ...args: Spread<T>
+    ): EffectScope<this>
+    plugin<T = undefined>(
+      plugin: Plugin.Object<this, T>,
+      ...args: Spread<T>
+    ): EffectScope<this>
   }
 }
 
@@ -178,21 +208,41 @@ class Registry<C extends Context = Context> {
     return this.plugin({ inject, apply: callback, name: callback.name })
   }
 
-  plugin(plugin: Plugin<C>, config?: any, getOuterStack: () => Iterable<string> = buildOuterStack()) {
+  plugin(
+    plugin: Plugin<C>,
+    config?: any,
+    getOuterStack: () => Iterable<string> = buildOuterStack(),
+  ) {
     // check if it's a valid plugin
     const callback = this.resolve(plugin)
-    if (!callback) throw new Error('invalid plugin, expect function or object with an "apply" method, received ' + typeof plugin)
+    if (!callback) {
+      throw new Error(
+        'invalid plugin, expect function or object with an "apply" method, received ' +
+          typeof plugin,
+      )
+    }
     this.ctx.scope.assertActive()
 
     let runtime = this._internal.get(callback)
     if (!runtime) {
       let name = plugin.name
       if (name === 'apply') name = undefined
-      runtime = { name, callback, scopes: new DisposableList(), Config: plugin.Config }
+      runtime = {
+        name,
+        callback,
+        scopes: new DisposableList(),
+        Config: plugin.Config,
+      }
       this._internal.set(callback, runtime)
     }
 
-    return new EffectScope(this.ctx, config, Inject.resolve(plugin.inject), runtime, getOuterStack)
+    return new EffectScope(
+      this.ctx,
+      config,
+      Inject.resolve(plugin.inject),
+      runtime,
+      getOuterStack,
+    )
   }
 }
 

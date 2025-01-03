@@ -18,7 +18,8 @@ export interface Options extends Loader.Config {
 
 const internalLoaders: ((require: NodeRequire) => any)[] = [
   // Node 20.13 and above
-  (require) => require('internal/modules/esm/loader').getOrInitializeCascadedLoader(),
+  (require) =>
+    require('internal/modules/esm/loader').getOrInitializeCascadedLoader(),
   (require) => require('internal/process/esm_loader').esmLoader,
 ]
 

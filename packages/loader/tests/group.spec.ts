@@ -222,7 +222,7 @@ describe('group management: intercept', () => {
       },
       config: [],
     }, outer)
-    
+
     id = await loader.create({
       name: 'foo',
       intercept: {
@@ -236,6 +236,7 @@ describe('group management: intercept', () => {
     const intercept = callback.mock.calls[0].arguments[0]
     expect(intercept.foo).to.deep.equal({ c: 3 })
     expect(Object.getPrototypeOf(intercept).foo).to.deep.equal({ b: 2 })
-    expect(Object.getPrototypeOf(Object.getPrototypeOf(intercept)).foo).to.deep.equal({ a: 1 })
+    expect(Object.getPrototypeOf(Object.getPrototypeOf(intercept)).foo).to.deep
+      .equal({ a: 1 })
   })
 })

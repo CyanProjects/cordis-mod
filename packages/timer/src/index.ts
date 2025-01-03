@@ -6,8 +6,15 @@ declare module '@cordisjs/core' {
     setTimeout(callback: () => void, delay: number): () => void
     setInterval(callback: () => void, delay: number): () => void
     sleep(delay: number): Promise<void>
-    throttle<F extends (...args: any[]) => void>(callback: F, delay: number, noTrailing?: boolean): WithDispose<F>
-    debounce<F extends (...args: any[]) => void>(callback: F, delay: number): WithDispose<F>
+    throttle<F extends (...args: any[]) => void>(
+      callback: F,
+      delay: number,
+      noTrailing?: boolean,
+    ): WithDispose<F>
+    debounce<F extends (...args: any[]) => void>(
+      callback: F,
+      delay: number,
+    ): WithDispose<F>
   }
 }
 
@@ -16,7 +23,13 @@ type WithDispose<T> = T & { dispose: () => void }
 export class TimerService extends Service {
   constructor(ctx: Context) {
     super(ctx, 'timer')
-    ctx.mixin('timer', ['setTimeout', 'setInterval', 'sleep', 'throttle', 'debounce'])
+    ctx.mixin('timer', [
+      'setTimeout',
+      'setInterval',
+      'sleep',
+      'throttle',
+      'debounce',
+    ])
   }
 
   setTimeout(callback: () => void, delay: number) {
@@ -53,7 +66,10 @@ export class TimerService extends Service {
     })
   }
 
-  private createWrapper(callback: (args: any[], check: () => boolean) => any, isDisposed = false) {
+  private createWrapper(
+    callback: (args: any[], check: () => boolean) => any,
+    isDisposed = false,
+  ) {
     this.ctx.scope.assertActive()
 
     let timer: number | NodeJS.Timeout | undefined
@@ -72,7 +88,11 @@ export class TimerService extends Service {
     return wrapper
   }
 
-  throttle<F extends (...args: any[]) => void>(callback: F, delay: number, noTrailing?: boolean): WithDispose<F> {
+  throttle<F extends (...args: any[]) => void>(
+    callback: F,
+    delay: number,
+    noTrailing?: boolean,
+  ): WithDispose<F> {
     let lastCall = -Infinity
     const execute = (...args: any[]) => {
       lastCall = Date.now()
@@ -89,7 +109,10 @@ export class TimerService extends Service {
     }, noTrailing)
   }
 
-  debounce<F extends (...args: any[]) => void>(callback: F, delay: number): WithDispose<F> {
+  debounce<F extends (...args: any[]) => void>(
+    callback: F,
+    delay: number,
+  ): WithDispose<F> {
     return this.createWrapper((args, isActive) => {
       if (!isActive()) return
       return setTimeout(callback, delay, ...args)

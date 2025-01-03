@@ -44,8 +44,12 @@ export class EntryGroup<C extends Context = Context> {
   async update(config: EntryOptions[]) {
     const oldConfig = this.data as EntryOptions[]
     this.data = config
-    const oldMap = Object.fromEntries(oldConfig.map(options => [options.id, options]))
-    const newMap = Object.fromEntries(config.map(options => [options.id ?? Symbol('anonymous'), options]))
+    const oldMap = Object.fromEntries(
+      oldConfig.map((options) => [options.id, options]),
+    )
+    const newMap = Object.fromEntries(
+      config.map((options) => [options.id ?? Symbol('anonymous'), options]),
+    )
 
     // update inner plugins
     const ids = Reflect.ownKeys({ ...oldMap, ...newMap }) as string[]

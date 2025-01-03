@@ -12,19 +12,22 @@ function withContext(callback: (ctx: Context) => Promise<void>) {
 }
 
 describe('inject.schema.config', () => {
-  it('basic support', withContext(async (ctx) => {
-    await assert.rejects(async () => {
-      await ctx.plugin({
-        inject: {
-          schema: {
-            required: true,
-            config: z.object({
-              foo: z.string().required(),
-            }),
+  it(
+    'basic support',
+    withContext(async (ctx) => {
+      await assert.rejects(async () => {
+        await ctx.plugin({
+          inject: {
+            schema: {
+              required: true,
+              config: z.object({
+                foo: z.string().required(),
+              }),
+            },
           },
-        },
-        apply(config) {},
+          apply(config) {},
+        })
       })
-    })
-  }))
+    }),
+  )
 })

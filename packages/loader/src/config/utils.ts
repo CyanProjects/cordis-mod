@@ -2,11 +2,15 @@ import { valueMap } from 'cosmokit'
 import * as yaml from 'js-yaml'
 
 // eslint-disable-next-line no-new-func
-export const evaluate = new Function('ctx', 'expr', `
+export const evaluate = new Function(
+  'ctx',
+  'expr',
+  `
   with (ctx) {
     return eval(expr)
   }
-`) as ((ctx: object, expr: string) => any)
+`,
+) as ((ctx: object, expr: string) => any)
 
 export function interpolate(ctx: object, value: any) {
   if (isJsExpr(value)) {
@@ -14,9 +18,9 @@ export function interpolate(ctx: object, value: any) {
   } else if (!value || typeof value !== 'object') {
     return value
   } else if (Array.isArray(value)) {
-    return value.map(item => interpolate(ctx, item))
+    return value.map((item) => interpolate(ctx, item))
   } else {
-    return valueMap(value, item => interpolate(ctx, item))
+    return valueMap(value, (item) => interpolate(ctx, item))
   }
 }
 

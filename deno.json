@@ -4,7 +4,12 @@
   },
   "lint": {
     "rules": {
-      "exclude": ["ban-types", "no-namespace", "no-explicit-any", "no-this-alias"]
+      "exclude": [
+        "ban-types",
+        "no-namespace",
+        "no-explicit-any",
+        "no-this-alias"
+      ]
     }
   }
 }

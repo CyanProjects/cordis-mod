@@ -1,7 +1,12 @@
 import { Dict, isNullable } from 'cosmokit'
 import { Context } from './context.ts'
 import { Inject, Plugin, resolveConfig } from './registry.ts'
-import { composeError, DisposableList, isConstructor, symbols } from './utils.ts'
+import {
+  composeError,
+  DisposableList,
+  isConstructor,
+  symbols,
+} from './utils.ts'
 
 declare module './context.ts' {
   export interface Context {
@@ -12,7 +17,9 @@ declare module './context.ts' {
 
 export type Disposable<T = any> = () => T
 
-export type Effect<T = void> = () => Disposable<T> | Iterable<Disposable, void, void>
+export type Effect<T = void> = () =>
+  | Disposable<T>
+  | Iterable<Disposable, void, void>
 
 export const enum ScopeStatus {
   PENDING,
@@ -122,10 +129,10 @@ export class EffectScope<C extends Context = Context> {
           if (value.done) break
         }
       } catch (error) {
-        disposables.forEach(dispose => dispose())
+        disposables.forEach((dispose) => dispose())
         throw error
       }
-      dispose = () => disposables.forEach(dispose => dispose())
+      dispose = () => disposables.forEach((dispose) => dispose())
     } else {
       throw new TypeError('effect must return a function or an iterable')
     }
@@ -163,18 +170,22 @@ export class EffectScope<C extends Context = Context> {
 
   private async _reload() {
     try {
-      await composeError(async () => {
-        if (isConstructor(this.runtime!.callback)) {
-          // eslint-disable-next-line new-cap
-          const instance = new this.runtime!.callback(this.ctx, this.config)
-          for (const hook of instance?.[symbols.initHooks] ?? []) {
-            hook()
+      await composeError(
+        async () => {
+          if (isConstructor(this.runtime!.callback)) {
+            // eslint-disable-next-line new-cap
+            const instance = new this.runtime!.callback(this.ctx, this.config)
+            for (const hook of instance?.[symbols.initHooks] ?? []) {
+              hook()
+            }
+            await instance?.[symbols.setup]?.()
+          } else {
+            await this.runtime!.callback(this.ctx, this.config)
           }
-          await instance?.[symbols.setup]?.()
-        } else {
-          await this.runtime!.callback(this.ctx, this.config)
-        }
-      }, 2, this.getOuterStack)
+        },
+        2,
+        this.getOuterStack,
+      )
     } catch (reason) {
       // the registry impl guarantees that the error is non-null
       this.context.emit(this.ctx, 'internal/error', reason)
@@ -187,13 +198,15 @@ export class EffectScope<C extends Context = Context> {
   }
 
   private async _unload() {
-    await Promise.all(this.disposables.clear().map(async (dispose) => {
-      try {
-        await composeError(dispose, 1, this.getOuterStack)
-      } catch (reason) {
-        this.context.emit(this.ctx, 'internal/error', reason)
-      }
-    }))
+    await Promise.all(
+      this.disposables.clear().map(async (dispose) => {
+        try {
+          await composeError(dispose, 1, this.getOuterStack)
+        } catch (reason) {
+          this.context.emit(this.ctx, 'internal/error', reason)
+        }
+      }),
+    )
     this._updateStatus(() => {
       this._pending = this._active ? this._reload() : undefined
     })

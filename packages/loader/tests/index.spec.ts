@@ -15,9 +15,18 @@ describe('loader: basic support', () => {
     await root.plugin(MockLoader)
     loader = root.loader as any
 
-    foo = loader.mock('foo', (ctx: Context) => ctx.on('internal/update', () => true))
-    bar = loader.mock('bar', (ctx: Context) => ctx.on('internal/update', () => true))
-    qux = loader.mock('qux', (ctx: Context) => ctx.on('internal/update', () => true))
+    foo = loader.mock(
+      'foo',
+      (ctx: Context) => ctx.on('internal/update', () => true),
+    )
+    bar = loader.mock(
+      'bar',
+      (ctx: Context) => ctx.on('internal/update', () => true),
+    )
+    qux = loader.mock(
+      'qux',
+      (ctx: Context) => ctx.on('internal/update', () => true),
+    )
 
     await loader.start()
   })

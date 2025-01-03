@@ -36,7 +36,10 @@ class NodeLoader extends Loader {
     const envFiles = ['.env', '.env.local']
     for (const filename of envFiles) {
       try {
-        const raw = await readFile(path.resolve(this.ctx.baseDir, filename), 'utf8')
+        const raw = await readFile(
+          path.resolve(this.ctx.baseDir, filename),
+          'utf8',
+        )
         Object.assign(override, dotenv.parse(raw))
       } catch {}
     }
@@ -56,7 +59,11 @@ class NodeLoader extends Loader {
         if (e.code !== 'ERR_REQUIRE_ESM' || !this.internal) throw e
         try {
           // TODO support hmr for cjs-esm interop
-          const result = this.internal.resolveSync(request, pathToFileURL(parent.filename).href, {})
+          const result = this.internal.resolveSync(
+            request,
+            pathToFileURL(parent.filename).href,
+            {},
+          )
           const job = result?.format === 'module'
             ? this.internal.loadCache.get(result.url)
             : undefined
@@ -75,7 +82,9 @@ class NodeLoader extends Loader {
   exit(code = NodeLoader.exitCode) {
     const body = JSON.stringify(this.envData)
     process.send?.({ type: 'shared', body }, (err: any) => {
-      if (err) this.ctx.emit(this.ctx, 'internal/error', 'failed to send shared data')
+      if (err) {
+        this.ctx.emit(this.ctx, 'internal/error', 'failed to send shared data')
+      }
       this.ctx.emit(this.ctx, 'internal/info', 'trigger full reload')
       process.exit(code)
     })

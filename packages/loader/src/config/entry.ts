@@ -25,11 +25,20 @@ function takeEntries(object: {}, keys: string[]) {
   return result
 }
 
-function sortKeys<T extends {}>(object: T, prepend = ['id', 'name'], append = ['config']): T {
+function sortKeys<T extends {}>(
+  object: T,
+  prepend = ['id', 'name'],
+  append = ['config'],
+): T {
   const part1 = takeEntries(object, prepend)
   const part2 = takeEntries(object, append)
-  const rest = takeEntries(object, Object.keys(object)).sort(([a], [b]) => a.localeCompare(b))
-  return Object.assign(object, Object.fromEntries([...part1, ...rest, ...part2]))
+  const rest = takeEntries(object, Object.keys(object)).sort(([a], [b]) =>
+    a.localeCompare(b)
+  )
+  return Object.assign(
+    object,
+    Object.fromEntries([...part1, ...rest, ...part2]),
+  )
 }
 
 export class Entry<C extends Context = Context> {
@@ -163,9 +172,13 @@ export class Entry<C extends Context = Context> {
   private async _init() {
     let exports: any
     try {
-      exports = await composeError(async () => {
-        return this.parent.tree.import(this.options.name)
-      }, 2, this.getOuterStack)
+      exports = await composeError(
+        async () => {
+          return this.parent.tree.import(this.options.name)
+        },
+        2,
+        this.getOuterStack,
+      )
     } catch (error) {
       this.context.emit(this.ctx, 'internal/error', error)
       return
@@ -173,7 +186,11 @@ export class Entry<C extends Context = Context> {
     const plugin = this.loader.unwrapExports(exports)
     this.patch()
     this.loader.showLog(this, 'apply')
-    this.scope = this.ctx.registry.plugin(plugin, this._resolveConfig(plugin), this.getOuterStack)
+    this.scope = this.ctx.registry.plugin(
+      plugin,
+      this._resolveConfig(plugin),
+      this.getOuterStack,
+    )
     this._initTask = undefined
   }
 }

@@ -23,7 +23,10 @@ declare module 'cordis' {
 async function loadDependencies(job: ModuleJob, ignored = new Set<string>()) {
   const dependencies = new Set<string>()
   async function traverse(job: ModuleJob) {
-    if (ignored.has(job.url) || dependencies.has(job.url) || job.url.startsWith('node:') || job.url.includes('/node_modules/')) return
+    if (
+      ignored.has(job.url) || dependencies.has(job.url) ||
+      job.url.startsWith('node:') || job.url.includes('/node_modules/')
+    ) return
     dependencies.add(job.url)
     const children = await job.linked
     await Promise.all(Array.prototype.map.call(children, traverse))
@@ -94,9 +97,16 @@ class HMR extends Service {
     })
 
     // files independent from any plugins will trigger a full reload
-    const mainJob = await loader.internal!.getModuleJobForImport('cordis/worker', import.meta.url, {})!
+    const mainJob = await loader.internal!.getModuleJobForImport(
+      'cordis/worker',
+      import.meta.url,
+      {},
+    )!
     this.externals = await loadDependencies(mainJob)
-    const partialReload = this.ctx.debounce(() => this.partialReload(), this.config.debounce)
+    const partialReload = this.ctx.debounce(
+      () => this.partialReload(),
+      this.config.debounce,
+    )
 
     this.watcher.on('change', async (path) => {
       this.ctx.logger.debug('change detected:', path)
@@ -133,7 +143,7 @@ class HMR extends Service {
     const job = this.internal.loadCache.get(pathToFileURL(filename).toString())
     if (!job) return []
     const linked = await job.linked
-    return linked.map(job => fileURLToPath(job.url))
+    return linked.map((job) => fileURLToPath(job.url))
   }
 
   private async analyzeChanges() {
@@ -146,7 +156,10 @@ class HMR extends Service {
     await Promise.all([...this.stashed].map(async (filename) => {
       const children = await this.getLinked(filename)
       for (const filename of children) {
-        if (this.accepted.has(filename) || this.declined.has(filename) || filename.includes('/node_modules/')) continue
+        if (
+          this.accepted.has(filename) || this.declined.has(filename) ||
+          filename.includes('/node_modules/')
+        ) continue
         pending.push(filename)
       }
     }))
@@ -159,7 +172,9 @@ class HMR extends Service {
         let isDeclined = true, isAccepted = false
         for (const filename of children) {
           // ignore all declined children
-          if (this.declined.has(filename) || filename.includes('/node_modules/')) continue
+          if (
+            this.declined.has(filename) || filename.includes('/node_modules/')
+          ) continue
           if (this.accepted.has(filename)) {
             // mark the module as accepted if any child is accepted
             isAccepted = true
@@ -209,7 +224,7 @@ class HMR extends Service {
     // Which means, reloading them will not cause any other reloads.
     const nameMap: Dict<Set<string>> = Object.create(null)
     for (const entry of this.ctx.loader.entries()) {
-      (nameMap[entry.parent.tree.url] ??= new Set()).add(entry.options.name)
+      ;(nameMap[entry.parent.tree.url] ??= new Set()).add(entry.options.name)
     }
     for (const baseURL in nameMap) {
       for (const name of nameMap[baseURL]) {
@@ -217,7 +232,9 @@ class HMR extends Service {
           const { url } = await this.internal.resolve(name, baseURL, {})
           if (this.declined.has(url)) continue
           const job = this.internal.loadCache.get(url)
-          const plugin = this.ctx.loader.unwrapExports(job?.module?.getNamespace())
+          const plugin = this.ctx.loader.unwrapExports(
+            job?.module?.getNamespace(),
+          )
           if (!job || !plugin) continue
           pending.set(job, plugin)
           this.declined.add(url)
@@ -235,8 +252,8 @@ class HMR extends Service {
 
       // we only detect reloads at plugin level
       // a plugin will be reloaded if any of its dependencies are accepted
-      if (!dependencies.some(dep => this.accepted.has(dep))) continue
-      dependencies.forEach(dep => this.accepted.add(dep))
+      if (!dependencies.some((dep) => this.accepted.has(dep))) continue
+      dependencies.forEach((dep) => this.accepted.add(dep))
 
       // prepare for reload
       reloads.set(plugin, {
@@ -257,7 +274,11 @@ class HMR extends Service {
     /** rollback cache */
     const rollback = () => {
       for (const filename in backup) {
-        Map.prototype.set.call(this.internal.loadCache, filename, backup[filename])
+        Map.prototype.set.call(
+          this.internal.loadCache,
+          filename,
+          backup[filename],
+        )
       }
     }
 
@@ -265,7 +286,9 @@ class HMR extends Service {
     const attempts: Dict = {}
     try {
       for (const [, { filename }] of reloads) {
-        attempts[filename] = this.ctx.loader.unwrapExports(await import(filename))
+        attempts[filename] = this.ctx.loader.unwrapExports(
+          await import(filename),
+        )
       }
     } catch (e) {
       handleError(this.ctx, e)

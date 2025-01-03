@@ -3,9 +3,9 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "lib",
-    "noImplicitAny": false,
+    "noImplicitAny": false
   },
   "include": [
-    "src",
-  ],
+    "src"
+  ]
 }

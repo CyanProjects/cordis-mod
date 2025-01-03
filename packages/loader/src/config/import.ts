@@ -56,7 +56,7 @@ export class ImportTree<C extends Context = Context> extends EntryTree<C> {
     const { name, initial } = options
     const dirents = await readdir(baseDir, { withFileTypes: true })
     for (const extension of LoaderFile.supported) {
-      const dirent = dirents.find(dirent => dirent.name === name + extension)
+      const dirent = dirents.find((dirent) => dirent.name === name + extension)
       if (!dirent) continue
       if (!dirent.isFile()) {
         throw new Error(`config file "${dirent.name}" is not a file`)
@@ -91,7 +91,9 @@ export class Import extends ImportTree {
 
   async [Service.setup]() {
     const { url } = this.config
-    const filename = fileURLToPath(new URL(url, this.ctx.scope.entry!.parent.tree.url))
+    const filename = fileURLToPath(
+      new URL(url, this.ctx.scope.entry!.parent.tree.url),
+    )
     const ext = extname(filename)
     if (!LoaderFile.supported.has(ext)) {
       throw new Error(`extension "${ext}" not supported`)

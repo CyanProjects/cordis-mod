@@ -17,7 +17,8 @@ interface LoadResult {
 type LoadCacheData = ModuleJob // | Function
 
 /** @see https://github.com/nodejs/node/blob/main/lib/internal/modules/esm/module_map.js */
-interface LoadCache extends Omit<Map<string, Dict<LoadCacheData>>, 'get' | 'set' | 'has'> {
+interface LoadCache
+  extends Omit<Map<string, Dict<LoadCacheData>>, 'get' | 'set' | 'has'> {
   get(url: string, type?: string): LoadCacheData | undefined
   set(url: string, type?: string, job?: LoadCacheData): this
   has(url: string, type?: string): boolean
@@ -42,10 +43,34 @@ export interface ModuleJob {
 /** @see https://github.com/nodejs/node/blob/main/lib/internal/modules/esm/loader.js */
 export interface ModuleLoader {
   loadCache: LoadCache
-  import(specifier: string, parentURL: string, importAttributes: ImportAttributes): Promise<any>
-  register(specifier: string | URL, parentURL?: string | URL, data?: any, transferList?: any[]): void
-  getModuleJobForImport(specifier: string, parentURL: string, importAttributes: ImportAttributes): Promise<ModuleJob>
-  resolve(originalSpecifier: string, parentURL: string, importAttributes: ImportAttributes): Promise<ResolveResult>
-  resolveSync(originalSpecifier: string, parentURL: string, importAttributes: ImportAttributes): ResolveResult
-  load(specifier: string, context: Pick<LoadHookContext, 'format' | 'importAttributes'>): Promise<LoadResult>
+  import(
+    specifier: string,
+    parentURL: string,
+    importAttributes: ImportAttributes,
+  ): Promise<any>
+  register(
+    specifier: string | URL,
+    parentURL?: string | URL,
+    data?: any,
+    transferList?: any[],
+  ): void
+  getModuleJobForImport(
+    specifier: string,
+    parentURL: string,
+    importAttributes: ImportAttributes,
+  ): Promise<ModuleJob>
+  resolve(
+    originalSpecifier: string,
+    parentURL: string,
+    importAttributes: ImportAttributes,
+  ): Promise<ResolveResult>
+  resolveSync(
+    originalSpecifier: string,
+    parentURL: string,
+    importAttributes: ImportAttributes,
+  ): ResolveResult
+  load(
+    specifier: string,
+    context: Pick<LoadHookContext, 'format' | 'importAttributes'>,
+  ): Promise<LoadResult>
 }

@@ -20,7 +20,7 @@ export abstract class EntryTree<C extends Context = Context> {
     return this.ctx
   }
 
-  * entries(): Generator<Entry<C>, void, void> {
+  *entries(): Generator<Entry<C>, void, void> {
     for (const entry of Object.values(this.store)) {
       yield entry
       if (!entry.subtree) continue
@@ -30,9 +30,9 @@ export abstract class EntryTree<C extends Context = Context> {
 
   async wait() {
     while (1) {
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, 100))
       const pendings = [...this.entries()]
-        .map(entry => entry._initTask || entry.scope?.pending!)
+        .map((entry) => entry._initTask || entry.scope?.pending!)
         .filter(Boolean)
       if (!pendings.length) return
       await Promise.all(pendings)
@@ -68,7 +68,11 @@ export abstract class EntryTree<C extends Context = Context> {
     return entry.subgroup
   }
 
-  async create(options: Omit<EntryOptions, 'id'>, parent: string | null = null, position = Infinity) {
+  async create(
+    options: Omit<EntryOptions, 'id'>,
+    parent: string | null = null,
+    position = Infinity,
+  ) {
     const group = this.resolveGroup(parent)
     group.data.splice(position, 0, options as EntryOptions)
     group.tree.write()
@@ -81,7 +85,12 @@ export abstract class EntryTree<C extends Context = Context> {
     entry.parent.tree.write()
   }
 
-  async update(id: string, options: Omit<EntryOptions, 'id' | 'name'>, parent?: string | null, position?: number) {
+  async update(
+    id: string,
+    options: Omit<EntryOptions, 'id' | 'name'>,
+    parent?: string | null,
+    position?: number,
+  ) {
     const entry = this.resolve(id)
     const source = entry.parent
     if (parent !== undefined) {

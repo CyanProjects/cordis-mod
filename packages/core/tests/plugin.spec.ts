@@ -66,11 +66,13 @@ describe('Plugin', () => {
       },
     })
 
-    await root.plugin(class Qux {
-      constructor(ctx: Context) {
-        expect(inspect(ctx)).to.equal('Context <Qux>')
-      }
-    })
+    await root.plugin(
+      class Qux {
+        constructor(ctx: Context) {
+          expect(inspect(ctx)).to.equal('Context <Qux>')
+        }
+      },
+    )
   })
 
   it('registry', () => {

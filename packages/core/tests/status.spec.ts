@@ -9,10 +9,12 @@ describe('Status', () => {
     const callback = mock.fn()
     const error = mock.fn()
     root.on('internal/error', error)
-    const apply = mock.fn((ctx: Context, config: { foo?: boolean } | undefined) => {
-      ctx.on(event, callback)
-      if (!config?.foo) throw new Error('plugin error')
-    })
+    const apply = mock.fn(
+      (ctx: Context, config: { foo?: boolean } | undefined) => {
+        ctx.on(event, callback)
+        if (!config?.foo) throw new Error('plugin error')
+      },
+    )
 
     const scope1 = root.plugin(apply)
     const scope2 = root.plugin(apply, { foo: true })

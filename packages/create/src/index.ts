@@ -1,4 +1,13 @@
-import { access, copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import {
+  access,
+  copyFile,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  stat,
+  writeFile,
+} from 'node:fs/promises'
 import { execSync } from 'node:child_process'
 import { basename, join, relative } from 'node:path'
 import { Readable } from 'node:stream'
@@ -92,8 +101,11 @@ class Scaffold {
       yarnPath?: string
     }
 
-    const rc = yaml.load(await readFile(join(rootDir, '.yarnrc.yml'), 'utf8')) as any as YarnRC
-    const version = rc.yarnPath?.match(/^\.yarn\/releases\/yarn-([^/]+).cjs$/)?.[1]
+    const rc = yaml.load(
+      await readFile(join(rootDir, '.yarnrc.yml'), 'utf8'),
+    ) as any as YarnRC
+    const version = rc.yarnPath?.match(/^\.yarn\/releases\/yarn-([^/]+).cjs$/)
+      ?.[1]
     if (!version) return
 
     const cacheDir = join(paths.cache, '.yarn/releases')
@@ -104,7 +116,9 @@ class Scaffold {
       const tempDir = join(paths.temp, '@yarnpkg/cli-dist')
       await mkdir(tempDir, { recursive: true })
       await mkdir(cacheDir, { recursive: true })
-      const resp3 = await fetch(`${this.registry}/@yarnpkg/cli-dist/-/cli-dist-${version}.tgz`)
+      const resp3 = await fetch(
+        `${this.registry}/@yarnpkg/cli-dist/-/cli-dist-${version}.tgz`,
+      )
       await new Promise<void>((resolve, reject) => {
         const stream = Readable.fromWeb(resp3.body as any).pipe(tar.extract({
           cwd: tempDir,
@@ -130,13 +144,19 @@ class Scaffold {
     this.registry = (await getRegistry()).replace(/\/$/, '')
     console.log(kleur.dim('  Registry server: ') + this.registry)
 
-    console.log(kleur.dim('  Scaffolding project in ') + project + kleur.dim(' ...'))
+    console.log(
+      kleur.dim('  Scaffolding project in ') + project + kleur.dim(' ...'),
+    )
     const template = argv.template || this.options.template
 
     const resp1 = await fetch(`${this.registry}/${template}`)
     if (!resp1.ok) {
       const { status, statusText } = resp1
-      console.log(`${kleur.red('error')} request failed with status code ${status} ${statusText}`)
+      console.log(
+        `${
+          kleur.red('error')
+        } request failed with status code ${status} ${statusText}`,
+      )
       process.exit(1)
     }
     const remote = await resp1.json()
@@ -188,22 +208,35 @@ class Scaffold {
     const yes = await confirm('Install and start it now?')
     if (yes) {
       execSync([agent, 'install'].join(' '), { stdio: 'inherit', cwd: rootDir })
-      execSync([agent, 'run', 'start'].join(' '), { stdio: 'inherit', cwd: rootDir })
+      execSync([agent, 'run', 'start'].join(' '), {
+        stdio: 'inherit',
+        cwd: rootDir,
+      })
     } else {
       console.log(kleur.dim('  You can start it later by:\n'))
       if (rootDir !== cwd) {
         const related = relative(cwd, rootDir)
         console.log(kleur.blue(`  cd ${kleur.bold(related)}`))
       }
-      console.log(kleur.blue(`  ${agent === 'yarn' ? 'yarn' : `${agent} install`}`))
-      console.log(kleur.blue(`  ${agent === 'yarn' ? 'yarn start' : `${agent} run start`}`))
+      console.log(
+        kleur.blue(`  ${agent === 'yarn' ? 'yarn' : `${agent} install`}`),
+      )
+      console.log(
+        kleur.blue(
+          `  ${agent === 'yarn' ? 'yarn start' : `${agent} run start`}`,
+        ),
+      )
       console.log()
     }
   }
 
   async start() {
     console.log()
-    console.log(`  ${kleur.bold(`create ${this.options.name}`)}  ${kleur.blue(`v${this.options.version}`)}`)
+    console.log(
+      `  ${kleur.bold(`create ${this.options.name}`)}  ${
+        kleur.blue(`v${this.options.version}`)
+      }`,
+    )
     console.log()
 
     const name = await this.getName()

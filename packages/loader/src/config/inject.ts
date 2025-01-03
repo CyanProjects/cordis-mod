@@ -12,7 +12,10 @@ export const name = 'inject'
 
 export function apply(ctx: Context) {
   function getRequired(entry: Entry) {
-    return filterKeys(Inject.resolve(entry.options.inject), (_, meta) => meta.required)
+    return filterKeys(
+      Inject.resolve(entry.options.inject),
+      (_, meta) => meta.required,
+    )
   }
 
   const checkInject = (scope: EffectScope, name: string) => {

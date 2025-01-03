@@ -1,4 +1,10 @@
-import { access, constants, readFile, rename, writeFile } from 'node:fs/promises'
+import {
+  access,
+  constants,
+  readFile,
+  rename,
+  writeFile,
+} from 'node:fs/promises'
 import { pathToFileURL } from 'node:url'
 import { remove } from 'cosmokit'
 import * as yaml from 'js-yaml'

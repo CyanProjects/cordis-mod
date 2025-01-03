@@ -56,8 +56,13 @@ export class LoggerService extends Service {
   }
 
   static {
-    for (const type of ['success', 'error', 'info', 'warn', 'debug', 'extend']) {
-      LoggerService.prototype[type] = function (this: LoggerService, ...args: any[]) {
+    for (
+      const type of ['success', 'error', 'info', 'warn', 'debug', 'extend']
+    ) {
+      LoggerService.prototype[type] = function (
+        this: LoggerService,
+        ...args: any[]
+      ) {
         let config: LoggerService.Config = {}
         let intercept = this.ctx[Context.intercept]
         while (intercept) {

@@ -1,20 +1,41 @@
 import { defineProperty, Dict, isNullable } from 'cosmokit'
 import { Context } from './context.ts'
-import { getTraceable, isObject, isUnproxyable, symbols, withProps } from './utils.ts'
+import {
+  getTraceable,
+  isObject,
+  isUnproxyable,
+  symbols,
+  withProps,
+} from './utils.ts'
 import { EffectScope, ScopeStatus } from './scope.ts'
 
 declare module './context.ts' {
   interface Context {
-    get<K extends string & keyof this>(name: K, strict?: boolean): undefined | this[K]
+    get<K extends string & keyof this>(
+      name: K,
+      strict?: boolean,
+    ): undefined | this[K]
     get(name: string, strict?: boolean): any
-    set<K extends string & keyof this>(name: K, value: undefined | this[K]): () => void
+    set<K extends string & keyof this>(
+      name: K,
+      value: undefined | this[K],
+    ): () => void
     set(name: string, value: any): () => void
     /** @deprecated use `ctx.set()` instead */
     provide(name: string, value?: any, builtin?: boolean): void
-    accessor(name: string, options: Omit<Context.Internal.Accessor, 'type'>): void
+    accessor(
+      name: string,
+      options: Omit<Context.Internal.Accessor, 'type'>,
+    ): void
     alias(name: string, aliases: string[]): void
-    mixin<K extends string & keyof this>(name: K, mixins: (keyof this & keyof this[K])[] | Dict<string>): void
-    mixin<T extends {}>(source: T, mixins: (keyof this & keyof T)[] | Dict<string>): void
+    mixin<K extends string & keyof this>(
+      name: K,
+      mixins: (keyof this & keyof this[K])[] | Dict<string>,
+    ): void
+    mixin<T extends {}>(
+      source: T,
+      mixins: (keyof this & keyof T)[] | Dict<string>,
+    ): void
   }
 }
 
@@ -28,12 +49,21 @@ class ReflectService {
     return [name, internal] as const
   }
 
-  static checkInject(ctx: Context, name: string, error: Error, provider?: EffectScope) {
+  static checkInject(
+    ctx: Context,
+    name: string,
+    error: Error,
+    provider?: EffectScope,
+  ) {
     ctx = ctx[symbols.shadow] ?? ctx
     // Case 1: built-in services and special properties
     // - prototype: prototype detection
     // - then: async function return
-    if (['prototype', 'then', 'registry', 'events', 'reflect', 'scope'].includes(name)) return
+    if (
+      ['prototype', 'then', 'registry', 'events', 'reflect', 'scope'].includes(
+        name,
+      )
+    ) return
     // Case 2: `$` or `_` prefix
     if (name[0] === '$' || name[0] === '_') return
     // Case 3: access directly from root
@@ -56,7 +86,9 @@ class ReflectService {
 
       const [name, internal] = ReflectService.resolveInject(target, prop)
       // trace caller
-      const error = new Error(`property ${name} is not registered, declare it as \`inject\` to suppress this warning`)
+      const error = new Error(
+        `property ${name} is not registered, declare it as \`inject\` to suppress this warning`,
+      )
       if (!internal) {
         ReflectService.checkInject(ctx, name, error)
         return Reflect.get(target, name, ctx)
@@ -105,7 +137,14 @@ class ReflectService {
       noShadow: true,
     })
 
-    this._mixin('reflect', ['get', 'set', 'provide', 'accessor', 'mixin', 'alias'])
+    this._mixin('reflect', [
+      'get',
+      'set',
+      'provide',
+      'accessor',
+      'mixin',
+      'alias',
+    ])
     this._mixin('scope', ['runtime', 'effect'])
     this._mixin('registry', ['inject', 'plugin'])
     this._mixin('events', ['on', 'once', 'parallel', 'emit', 'serial', 'bail'])
@@ -141,7 +180,13 @@ class ReflectService {
       })
     }
     if (isUnproxyable(value)) {
-      ctx.emit(ctx, 'internal/warning', new Error(`service ${name} is an unproxyable object, which may lead to unexpected behavior`))
+      ctx.emit(
+        ctx,
+        'internal/warning',
+        new Error(
+          `service ${name} is an unproxyable object, which may lead to unexpected behavior`,
+        ),
+      )
     }
 
     // setup filter for events
@@ -196,8 +241,12 @@ class ReflectService {
   }
 
   _mixin(source: any, mixins: string[] | Dict<string>) {
-    const entries = Array.isArray(mixins) ? mixins.map(key => [key, key]) : Object.entries(mixins)
-    const getTarget = typeof source === 'string' ? (ctx: Context) => ctx[source] : () => source
+    const entries = Array.isArray(mixins)
+      ? mixins.map((key) => [key, key])
+      : Object.entries(mixins)
+    const getTarget = typeof source === 'string'
+      ? (ctx: Context) => ctx[source]
+      : () => source
     const disposables = entries.map(([key, value]) => {
       return this._accessor(value, {
         get(receiver) {
@@ -215,7 +264,7 @@ class ReflectService {
         },
       })
     })
-    return () => disposables.forEach(dispose => dispose())
+    return () => disposables.forEach((dispose) => dispose())
   }
 
   mixin(source: any, mixins: string[] | Dict<string>) {
@@ -231,10 +280,18 @@ class ReflectService {
   bind<T extends Function>(callback: T) {
     return new Proxy(callback, {
       apply: (target, thisArg, args) => {
-        return Reflect.apply(target, this.trace(thisArg), args.map(arg => this.trace(arg)))
+        return Reflect.apply(
+          target,
+          this.trace(thisArg),
+          args.map((arg) => this.trace(arg)),
+        )
       },
       construct: (target, args, newTarget) => {
-        return Reflect.construct(target, args.map(arg => this.trace(arg)), newTarget)
+        return Reflect.construct(
+          target,
+          args.map((arg) => this.trace(arg)),
+          newTarget,
+        )
       },
     })
   }

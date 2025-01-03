@@ -32,7 +32,7 @@ function unparse(argv: Dict) {
     } else if (value === false) {
       return ['--no-' + key.slice(2)]
     } else if (Array.isArray(value)) {
-      return value.flatMap(value => [key, value])
+      return value.flatMap((value) => [key, value])
     } else {
       return [key, value]
     }
@@ -52,7 +52,9 @@ cli.command('start [file]', 'start a cordis application')
     const { logLevel, debug, logTime, ...rest } = options
     if (logLevel !== undefined && (!isInteger(logLevel) || logLevel < 0)) {
       // eslint-disable-next-line no-console
-      console.warn(`${kleur.red('error')} log level should be a positive integer.`)
+      console.warn(
+        `${kleur.red('error')} log level should be a positive integer.`,
+      )
       process.exit(1)
     }
     process.env.CORDIS_LOG_LEVEL = logLevel || ''

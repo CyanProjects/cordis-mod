@@ -10,23 +10,60 @@ export function isBailed(value: any) {
 
 export type Parameters<F> = F extends (...args: infer P) => any ? P : never
 export type ReturnType<F> = F extends (...args: any) => infer R ? R : never
-export type ThisType<F> = F extends (this: infer T, ...args: any) => any ? T : never
+export type ThisType<F> = F extends (this: infer T, ...args: any) => any ? T
+  : never
 export type GetEvents<C extends Context> = C[typeof Context.events]
 
 declare module './context.ts' {
   export interface Context {
     /* eslint-disable max-len */
     [Context.events]: Events<this>
-    parallel<K extends keyof GetEvents<this>>(name: K, ...args: Parameters<GetEvents<this>[K]>): Promise<void>
-    parallel<K extends keyof GetEvents<this>>(thisArg: ThisType<GetEvents<this>[K]>, name: K, ...args: Parameters<GetEvents<this>[K]>): Promise<void>
-    emit<K extends keyof GetEvents<this>>(name: K, ...args: Parameters<GetEvents<this>[K]>): void
-    emit<K extends keyof GetEvents<this>>(thisArg: ThisType<GetEvents<this>[K]>, name: K, ...args: Parameters<GetEvents<this>[K]>): void
-    serial<K extends keyof GetEvents<this>>(name: K, ...args: Parameters<GetEvents<this>[K]>): Promisify<ReturnType<GetEvents<this>[K]>>
-    serial<K extends keyof GetEvents<this>>(thisArg: ThisType<GetEvents<this>[K]>, name: K, ...args: Parameters<GetEvents<this>[K]>): Promisify<ReturnType<GetEvents<this>[K]>>
-    bail<K extends keyof GetEvents<this>>(name: K, ...args: Parameters<GetEvents<this>[K]>): ReturnType<GetEvents<this>[K]>
-    bail<K extends keyof GetEvents<this>>(thisArg: ThisType<GetEvents<this>[K]>, name: K, ...args: Parameters<GetEvents<this>[K]>): ReturnType<GetEvents<this>[K]>
-    on<K extends keyof GetEvents<this>>(name: K, listener: GetEvents<this>[K], options?: boolean | EventOptions): () => boolean
-    once<K extends keyof GetEvents<this>>(name: K, listener: GetEvents<this>[K], options?: boolean | EventOptions): () => boolean
+    parallel<K extends keyof GetEvents<this>>(
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): Promise<void>
+    parallel<K extends keyof GetEvents<this>>(
+      thisArg: ThisType<GetEvents<this>[K]>,
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): Promise<void>
+    emit<K extends keyof GetEvents<this>>(
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): void
+    emit<K extends keyof GetEvents<this>>(
+      thisArg: ThisType<GetEvents<this>[K]>,
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): void
+    serial<K extends keyof GetEvents<this>>(
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): Promisify<ReturnType<GetEvents<this>[K]>>
+    serial<K extends keyof GetEvents<this>>(
+      thisArg: ThisType<GetEvents<this>[K]>,
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): Promisify<ReturnType<GetEvents<this>[K]>>
+    bail<K extends keyof GetEvents<this>>(
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): ReturnType<GetEvents<this>[K]>
+    bail<K extends keyof GetEvents<this>>(
+      thisArg: ThisType<GetEvents<this>[K]>,
+      name: K,
+      ...args: Parameters<GetEvents<this>[K]>
+    ): ReturnType<GetEvents<this>[K]>
+    on<K extends keyof GetEvents<this>>(
+      name: K,
+      listener: GetEvents<this>[K],
+      options?: boolean | EventOptions,
+    ): () => boolean
+    once<K extends keyof GetEvents<this>>(
+      name: K,
+      listener: GetEvents<this>[K],
+      options?: boolean | EventOptions,
+    ): () => boolean
     /* eslint-enable max-len */
   }
 }
@@ -52,17 +89,22 @@ class EventsService {
     })
 
     // TODO: deprecate these events
-    ctx.scope.leak(this.on('internal/listener', function (this: Context, name, listener, options: EventOptions) {
-      if (name === 'ready') {
-        Promise.resolve().then(listener)
-        return () => false
-      } else if (name === 'dispose') {
-        defineProperty(listener, 'name', 'event <dispose>')
-        return this.scope.disposables.push(listener)
-      } else if (name === 'internal/update' && !options.global) {
-        return this.scope.acceptors.push(listener)
-      }
-    }))
+    ctx.scope.leak(
+      this.on(
+        'internal/listener',
+        function (this: Context, name, listener, options: EventOptions) {
+          if (name === 'ready') {
+            Promise.resolve().then(listener)
+            return () => false
+          } else if (name === 'dispose') {
+            defineProperty(listener, 'name', 'event <dispose>')
+            return this.scope.disposables.push(listener)
+          } else if (name === 'internal/update' && !options.global) {
+            return this.scope.acceptors.push(listener)
+          }
+        },
+      ),
+    )
 
     for (const level of ['info', 'error', 'warning']) {
       ctx.scope.leak(this.on(`internal/${level}`, (format, ...param) => {
@@ -72,15 +114,17 @@ class EventsService {
       }))
     }
 
-    ctx.scope.leak(this.on('internal/before-service', function (this: Context, name) {
-      for (const runtime of this.registry.values()) {
-        for (const scope of runtime.scopes) {
-          if (!scope.inject[name]?.required) continue
-          if (!this[symbols.filter](scope.ctx)) continue
-          scope.active = false
+    ctx.scope.leak(
+      this.on('internal/before-service', function (this: Context, name) {
+        for (const runtime of this.registry.values()) {
+          for (const scope of runtime.scopes) {
+            if (!scope.inject[name]?.required) continue
+            if (!this[symbols.filter](scope.ctx)) continue
+            scope.active = false
+          }
         }
-      }
-    }, { global: true }))
+      }, { global: true }),
+    )
 
     ctx.scope.leak(this.on('internal/service', function (this: Context, name) {
       for (const runtime of this.registry.values()) {
@@ -98,27 +142,36 @@ class EventsService {
         const item = ctx[symbols.store][key as symbol]
         if (item.source.scope !== scope) continue
         if (item.value) {
-          item.source.emit(item.source, 'internal/service', item.name, item.value)
+          item.source.emit(
+            item.source,
+            'internal/service',
+            item.name,
+            item.value,
+          )
         }
       }
     }, { global: true }))
 
-    ctx.scope.leak(this.on('internal/inject', function (this: Context, name, provider) {
-      const visited = new Set<string>()
-      let scope = this.scope
-      while (1) {
-        if (scope === provider) return true
-        for (const key in scope.inject ?? {}) {
-          if (visited.has(key)) continue
-          visited.add(key)
-          if (name === ReflectService.resolveInject(scope.ctx, key)[0]) return true
+    ctx.scope.leak(
+      this.on('internal/inject', function (this: Context, name, provider) {
+        const visited = new Set<string>()
+        let scope = this.scope
+        while (1) {
+          if (scope === provider) return true
+          for (const key in scope.inject ?? {}) {
+            if (visited.has(key)) continue
+            visited.add(key)
+            if (name === ReflectService.resolveInject(scope.ctx, key)[0]) {
+              return true
+            }
+          }
+          const next = scope.parent.scope
+          if (scope === next) break
+          scope = next
         }
-        const next = scope.parent.scope
-        if (scope === next) break
-        scope = next
-      }
-      return false
-    }, { global: true }))
+        return false
+      }, { global: true }),
+    )
 
     ctx.scope.leak(this.on('internal/update', (scope, config) => {
       for (const acceptor of scope.acceptors) {
@@ -135,8 +188,10 @@ class EventsService {
     })
   }
 
-  * dispatch(type: string, args: any[]) {
-    const thisArg = typeof args[0] === 'object' || typeof args[0] === 'function' ? args.shift() : null
+  *dispatch(type: string, args: any[]) {
+    const thisArg = typeof args[0] === 'object' || typeof args[0] === 'function'
+      ? args.shift()
+      : null
     const name: string = args.shift()
     if (!name.startsWith('internal/')) {
       this.emit('internal/event', type, name, args, thisArg)
@@ -175,14 +230,18 @@ class EventsService {
   }
 
   unregister(hooks: Hook[], callback: any) {
-    const index = hooks.findIndex(hook => hook.callback === callback)
+    const index = hooks.findIndex((hook) => hook.callback === callback)
     if (index >= 0) {
       hooks.splice(index, 1)
       return true
     }
   }
 
-  on(name: string, listener: (...args: any) => any, options?: boolean | EventOptions) {
+  on(
+    name: string,
+    listener: (...args: any) => any,
+    options?: boolean | EventOptions,
+  ) {
     if (typeof options !== 'object') {
       options = { prepend: options }
     }
@@ -190,15 +249,27 @@ class EventsService {
     // handle special events
     this.ctx.scope.assertActive()
     listener = this.ctx.reflect.bind(listener)
-    const result = this.bail(this.ctx, 'internal/listener', name, listener, options)
+    const result = this.bail(
+      this.ctx,
+      'internal/listener',
+      name,
+      listener,
+      options,
+    )
     if (result) return result
 
     const hooks = this._hooks[name] ||= []
-    const label = typeof name === 'string' ? `event <${name}>` : 'event (Symbol)'
+    const label = typeof name === 'string'
+      ? `event <${name}>`
+      : 'event (Symbol)'
     return this.register(label, hooks, listener, options)
   }
 
-  once(name: string, listener: (...args: any) => any, options?: boolean | EventOptions) {
+  once(
+    name: string,
+    listener: (...args: any) => any,
+    options?: boolean | EventOptions,
+  ) {
     const dispose = this.on(name, function (...args: any[]) {
       dispose()
       return listener.apply(this, args)
@@ -220,7 +291,21 @@ export interface Events<in C extends Context = Context> {
   'internal/before-service'(this: C, name: string, value: any): void
   'internal/service'(this: C, name: string, value: any): void
   'internal/update'(scope: EffectScope<C>, config: any): boolean | void
-  'internal/inject'(this: C, name: string, provider?: EffectScope): boolean | void
-  'internal/listener'(this: C, name: string, listener: any, prepend: boolean): void
-  'internal/event'(type: 'emit' | 'parallel' | 'serial' | 'bail', name: string, args: any[], thisArg: any): void
+  'internal/inject'(
+    this: C,
+    name: string,
+    provider?: EffectScope,
+  ): boolean | void
+  'internal/listener'(
+    this: C,
+    name: string,
+    listener: any,
+    prepend: boolean,
+  ): void
+  'internal/event'(
+    type: 'emit' | 'parallel' | 'serial' | 'bail',
+    name: string,
+    args: any[],
+    thisArg: any,
+  ): void
 }

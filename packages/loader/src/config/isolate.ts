@@ -23,7 +23,11 @@ function swap<T extends {}>(target: T, source?: T | null) {
     Reflect.deleteProperty(target, key)
   }
   for (const key of Reflect.ownKeys(source || {})) {
-    Reflect.defineProperty(target, key, Reflect.getOwnPropertyDescriptor(source!, key)!)
+    Reflect.defineProperty(
+      target,
+      key,
+      Reflect.getOwnPropertyDescriptor(source!, key)!,
+    )
   }
 }
 
@@ -75,7 +79,11 @@ export function apply(ctx: Context) {
   const realms: Dict<GlobalRealm> = Object.create(null)
 
   function access(entry: Entry, key: string, create: true): symbol
-  function access(entry: Entry, key: string, create?: boolean): symbol | undefined
+  function access(
+    entry: Entry,
+    key: string,
+    create?: boolean,
+  ): symbol | undefined
   function access(entry: Entry, key: string, create = false) {
     let realm: Realm | undefined
     const label = entry.options.isolate?.[key]
@@ -113,10 +121,20 @@ export function apply(ctx: Context) {
         const item = symbol && entry.ctx[Context.store][symbol]
         if (!item) continue
         if (!item.source) {
-          entry.ctx.emit(entry.ctx, 'internal/warning', new Error(`expected service ${key} to be implemented`))
+          entry.ctx.emit(
+            entry.ctx,
+            'internal/warning',
+            new Error(`expected service ${key} to be implemented`),
+          )
           continue
         }
-        this.diff.push([key, oldMap[key], this.newMap[key], entry.ctx[delim], item.source[delim]])
+        this.diff.push([
+          key,
+          oldMap[key],
+          this.newMap[key],
+          entry.ctx[delim],
+          item.source[delim],
+        ])
         if (entry.ctx[delim] !== item.source[delim]) break
       }
     }
@@ -125,15 +143,24 @@ export function apply(ctx: Context) {
     for (const [key, symbol1, symbol2, flag1, flag2] of this.diff) {
       const self = Object.create(entry.ctx)
       self[Context.filter] = (target: Context) => {
-        if (![symbol1, symbol2].includes(target[Context.isolate][key])) return false
-        return (flag1 === target[entry.loader.delims[key]]) !== (flag1 === flag2)
+        if (![symbol1, symbol2].includes(target[Context.isolate][key])) {
+          return false
+        }
+        return (flag1 === target[entry.loader.delims[key]]) !==
+          (flag1 === flag2)
       }
       entry.ctx.emit(self, 'internal/before-service', key)
     }
 
     // step 4: set prototype for transferred context
-    Object.setPrototypeOf(entry.ctx[Context.isolate], entry.parent.ctx[Context.isolate])
-    Object.setPrototypeOf(entry.ctx[Context.intercept], entry.parent.ctx[Context.intercept])
+    Object.setPrototypeOf(
+      entry.ctx[Context.isolate],
+      entry.parent.ctx[Context.isolate],
+    )
+    Object.setPrototypeOf(
+      entry.ctx[Context.intercept],
+      entry.parent.ctx[Context.intercept],
+    )
     swap(entry.ctx[Context.isolate], this.newMap)
     swap(entry.ctx[Context.intercept], entry.options.intercept)
   })
@@ -141,7 +168,10 @@ export function apply(ctx: Context) {
   ctx.on('loader/after-patch', function (entry) {
     // step 5: replace service impl
     for (const [, symbol1, symbol2, flag1, flag2] of this.diff) {
-      if (flag1 === flag2 && entry.ctx[Context.store][symbol1] && !entry.ctx[Context.store][symbol2]) {
+      if (
+        flag1 === flag2 && entry.ctx[Context.store][symbol1] &&
+        !entry.ctx[Context.store][symbol2]
+      ) {
         entry.ctx[Context.store][symbol2] = entry.ctx[Context.store][symbol1]
         delete entry.ctx[Context.store][symbol1]
       }
@@ -151,8 +181,11 @@ export function apply(ctx: Context) {
     for (const [key, symbol1, symbol2, flag1, flag2] of this.diff) {
       const self = Object.create(entry.ctx)
       self[Context.filter] = (target: Context) => {
-        if (![symbol1, symbol2].includes(target[Context.isolate][key])) return false
-        return (flag1 === target[entry.loader.delims[key]]) !== (flag1 === flag2)
+        if (![symbol1, symbol2].includes(target[Context.isolate][key])) {
+          return false
+        }
+        return (flag1 === target[entry.loader.delims[key]]) !==
+          (flag1 === flag2)
       }
       entry.ctx.emit(self, 'internal/service', key)
     }

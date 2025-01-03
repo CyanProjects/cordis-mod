@@ -19,7 +19,11 @@ declare module '@cordisjs/core' {
     'loader/config-update'(): void
     'loader/entry-init'(entry: Entry): void
     'loader/entry-check'(entry: Entry): boolean | undefined
-    'loader/partial-dispose'(entry: Entry, legacy: Partial<EntryOptions>, active: boolean): void
+    'loader/partial-dispose'(
+      entry: Entry,
+      legacy: Partial<EntryOptions>,
+      active: boolean,
+    ): void
     'loader/before-patch'(this: EntryUpdateMeta, entry: Entry): void
     'loader/after-patch'(this: EntryUpdateMeta, entry: Entry): void
   }
@@ -46,7 +50,8 @@ export namespace Loader {
   }
 }
 
-export abstract class Loader<C extends Context = Context> extends ImportTree<C> {
+export abstract class Loader<C extends Context = Context>
+  extends ImportTree<C> {
   public envData = process.env.CORDIS_SHARED
     ? JSON.parse(process.env.CORDIS_SHARED)
     : { startTime: Date.now() }
@@ -113,7 +118,11 @@ export abstract class Loader<C extends Context = Context> extends ImportTree<C> 
 
   showLog(entry: Entry, type: string) {
     if (entry.options.group) return
-    this.ctx.get('logger')?.('loader').info('%s plugin %c', type, entry.options.name)
+    this.ctx.get('logger')?.('loader').info(
+      '%s plugin %c',
+      type,
+      entry.options.name,
+    )
   }
 
   locate(ctx = this.ctx) {

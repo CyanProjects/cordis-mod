@@ -77,19 +77,30 @@ export function isConstructor(func: any): func is new (...args: any) => any {
   // if (func.prototype.constructor !== func) return false
   if (func instanceof GeneratorFunction) return false
   // polyfilled AsyncGeneratorFunction === Function
-  if (AsyncGeneratorFunction !== Function && func instanceof AsyncGeneratorFunction) return false
+  if (
+    AsyncGeneratorFunction !== Function &&
+    func instanceof AsyncGeneratorFunction
+  ) return false
   return true
 }
 
 export function isUnproxyable(value: any) {
-  return [Map, Set, Date, Promise].some(constructor => value instanceof constructor)
+  return [Map, Set, Date, Promise].some((constructor) =>
+    value instanceof constructor
+  )
 }
 
 export function joinPrototype(proto1: {}, proto2: {}) {
   if (proto1 === Object.prototype) return proto2
-  const result = Object.create(joinPrototype(Object.getPrototypeOf(proto1), proto2))
+  const result = Object.create(
+    joinPrototype(Object.getPrototypeOf(proto1), proto2),
+  )
   for (const key of Reflect.ownKeys(proto1)) {
-    Object.defineProperty(result, key, Object.getOwnPropertyDescriptor(proto1, key)!)
+    Object.defineProperty(
+      result,
+      key,
+      Object.getOwnPropertyDescriptor(proto1, key)!,
+    )
   }
   return result
 }
@@ -121,24 +132,36 @@ export function withProps(target: any, props?: {}) {
   if (!props) return target
   return new Proxy(target, {
     get: (target, prop, receiver) => {
-      if (prop in props && prop !== 'constructor') return Reflect.get(props, prop, receiver)
+      if (prop in props && prop !== 'constructor') {
+        return Reflect.get(props, prop, receiver)
+      }
       return Reflect.get(target, prop, receiver)
     },
     set: (target, prop, value, receiver) => {
-      if (prop in props && prop !== 'constructor') return Reflect.set(props, prop, value, receiver)
+      if (prop in props && prop !== 'constructor') {
+        return Reflect.set(props, prop, value, receiver)
+      }
       return Reflect.set(target, prop, value, receiver)
     },
   })
 }
 
 function withProp(target: any, prop: string | symbol, value: any) {
-  return withProps(target, Object.defineProperty(Object.create(null), prop, {
-    value,
-    writable: false,
-  }))
+  return withProps(
+    target,
+    Object.defineProperty(Object.create(null), prop, {
+      value,
+      writable: false,
+    }),
+  )
 }
 
-function createShadow(ctx: Context, target: any, property: string | undefined, receiver: any) {
+function createShadow(
+  ctx: Context,
+  target: any,
+  property: string | undefined,
+  receiver: any,
+) {
   if (!property) return receiver
   const origin = Reflect.getOwnPropertyDescriptor(target, property)?.value
   if (!origin) return receiver
@@ -165,8 +188,15 @@ function createTraceable(ctx: Context, value: any, tracker: Tracker) {
       if (typeof prop === 'symbol') {
         return Reflect.get(target, prop, receiver)
       }
-      if (tracker.associate && ctx[symbols.internal][`${tracker.associate}.${prop}`]) {
-        return Reflect.get(ctx, `${tracker.associate}.${prop}`, withProp(ctx, symbols.receiver, receiver))
+      if (
+        tracker.associate &&
+        ctx[symbols.internal][`${tracker.associate}.${prop}`]
+      ) {
+        return Reflect.get(
+          ctx,
+          `${tracker.associate}.${prop}`,
+          withProp(ctx, symbols.receiver, receiver),
+        )
       }
       let shadow: any, innerValue: any
       const desc = getPropertyDescriptor(target, prop)
@@ -192,8 +222,16 @@ function createTraceable(ctx: Context, value: any, tracker: Tracker) {
       if (typeof prop === 'symbol') {
         return Reflect.set(target, prop, value, receiver)
       }
-      if (tracker.associate && ctx[symbols.internal][`${tracker.associate}.${prop}`]) {
-        return Reflect.set(ctx, `${tracker.associate}.${prop}`, value, withProp(ctx, symbols.receiver, receiver))
+      if (
+        tracker.associate &&
+        ctx[symbols.internal][`${tracker.associate}.${prop}`]
+      ) {
+        return Reflect.set(
+          ctx,
+          `${tracker.associate}.${prop}`,
+          value,
+          withProp(ctx, symbols.receiver, receiver),
+        )
       }
       const shadow = createShadow(ctx, target, tracker.property, receiver)
       return Reflect.set(target, prop, value, shadow)
@@ -219,7 +257,11 @@ export function createCallable(name: string, proto: {}, tracker: Tracker) {
   return Object.setPrototypeOf(self, proto)
 }
 
-export async function composeError<T>(callback: () => Promise<T>, innerOffset: number, getOuterStack: () => Iterable<string>) {
+export async function composeError<T>(
+  callback: () => Promise<T>,
+  innerOffset: number,
+  getOuterStack: () => Iterable<string>,
+) {
   // force async stack trace
   await Promise.resolve()
 

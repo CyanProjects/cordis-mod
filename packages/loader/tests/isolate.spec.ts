@@ -16,15 +16,25 @@ describe('service isolation: basic', () => {
     await root.plugin(MockLoader)
     loader = root.loader as any
 
-    foo = loader.mock('foo', defineProperty((ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }, 'inject', ['bar']))
-  
-    bar = loader.mock('bar', class Bar extends Service {
-      constructor(ctx: Context) {
-        super(ctx, 'bar')
-      }
-    })
+    foo = loader.mock(
+      'foo',
+      defineProperty(
+        (ctx: Context) => {
+          ctx.on('dispose', dispose)
+        },
+        'inject',
+        ['bar'],
+      ),
+    )
+
+    bar = loader.mock(
+      'bar',
+      class Bar extends Service {
+        constructor(ctx: Context) {
+          super(ctx, 'bar')
+        }
+      },
+    )
 
     await loader.start()
   })
@@ -154,12 +164,15 @@ describe('service isolation: realm', () => {
     await root.plugin(MockLoader)
     loader = root.loader as any
 
-    foo = Object.assign(loader.mock('foo', (ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }), {
-      inject: ['bar'],
-    })
-  
+    foo = Object.assign(
+      loader.mock('foo', (ctx: Context) => {
+        ctx.on('dispose', dispose)
+      }),
+      {
+        inject: ['bar'],
+      },
+    )
+
     bar = Object.assign(loader.mock('bar', (ctx: Context, config = {}) => {
       ctx.set('bar', config)
     }))
@@ -259,15 +272,18 @@ describe('service isolation: realm', () => {
     const root = new Context()
     await root.plugin(MockLoader)
     const loader = root.loader as unknown as MockLoader
-  
+
     const dispose = mock.fn()
-  
-    const foo = Object.assign(loader.mock('foo', (ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }), {
-      inject: ['bar'],
-    })
-  
+
+    const foo = Object.assign(
+      loader.mock('foo', (ctx: Context) => {
+        ctx.on('dispose', dispose)
+      }),
+      {
+        inject: ['bar'],
+      },
+    )
+
     Object.assign(loader.mock('bar', (ctx: Context, config = {}) => {
       ctx.set('bar', config)
     }))
@@ -292,7 +308,7 @@ describe('service isolation: realm', () => {
       config: { value: 'custom' },
     }, inner)
 
-    const  alpha = await loader.create({
+    const alpha = await loader.create({
       name: 'foo',
       isolate: {
         bar: 'custom',
@@ -338,15 +354,18 @@ describe('service isolation: realm', () => {
     const root = new Context()
     await root.plugin(MockLoader)
     const loader = root.loader as unknown as MockLoader
-  
+
     const dispose = mock.fn()
-  
-    const foo = Object.assign(loader.mock('foo', (ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }), {
-      inject: ['bar'],
-    })
-  
+
+    const foo = Object.assign(
+      loader.mock('foo', (ctx: Context) => {
+        ctx.on('dispose', dispose)
+      }),
+      {
+        inject: ['bar'],
+      },
+    )
+
     Object.assign(loader.mock('bar', (ctx: Context, config = {}) => {
       ctx.set('bar', config)
     }))
@@ -406,15 +425,18 @@ describe('service isolation: realm', () => {
     const root = new Context()
     await root.plugin(MockLoader)
     const loader = root.loader as unknown as MockLoader
-  
+
     const dispose = mock.fn()
-  
-    const foo = Object.assign(loader.mock('foo', (ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }), {
-      inject: ['bar'],
-    })
-  
+
+    const foo = Object.assign(
+      loader.mock('foo', (ctx: Context) => {
+        ctx.on('dispose', dispose)
+      }),
+      {
+        inject: ['bar'],
+      },
+    )
+
     const bar = loader.mock('bar', (ctx: Context, config = {}) => {
       ctx.set('bar', config)
     })
@@ -485,15 +507,25 @@ describe('service isolation: transfer', () => {
     await root.plugin(MockLoader)
     loader = root.loader as any
 
-    foo = loader.mock('foo', defineProperty((ctx: Context) => {
-      ctx.on('dispose', dispose)
-    }, 'inject', ['bar']))
+    foo = loader.mock(
+      'foo',
+      defineProperty(
+        (ctx: Context) => {
+          ctx.on('dispose', dispose)
+        },
+        'inject',
+        ['bar'],
+      ),
+    )
 
-    bar = loader.mock('bar', class Bar extends Service {
-      constructor(ctx: Context) {
-        super(ctx, 'bar')
-      }
-    })
+    bar = loader.mock(
+      'bar',
+      class Bar extends Service {
+        constructor(ctx: Context) {
+          super(ctx, 'bar')
+        }
+      },
+    )
 
     await loader.start()
   })

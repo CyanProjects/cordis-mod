@@ -24,7 +24,11 @@ export abstract class Service<C extends Context = Context> {
       property: 'ctx',
     }
     if (self[symbols.invoke]) {
-      self = createCallable(name, joinPrototype(Object.getPrototypeOf(this), Function.prototype), tracker)
+      self = createCallable(
+        name,
+        joinPrototype(Object.getPrototypeOf(this), Function.prototype),
+        tracker,
+      )
     }
     self.ctx = ctx
     self.name = name
@@ -40,7 +44,8 @@ export abstract class Service<C extends Context = Context> {
   }
 
   protected [symbols.filter](ctx: Context) {
-    return ctx[symbols.isolate][this.name] === this.ctx[symbols.isolate][this.name]
+    return ctx[symbols.isolate][this.name] ===
+      this.ctx[symbols.isolate][this.name]
   }
 
   protected [symbols.extend](props?: any) {

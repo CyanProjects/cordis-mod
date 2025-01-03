@@ -5,9 +5,9 @@
     "outDir": "lib",
     "noImplicitAny": false,
     "noImplicitThis": false,
-    "strictFunctionTypes": false,
+    "strictFunctionTypes": false
   },
   "include": [
-    "src",
-  ],
+    "src"
+  ]
 }

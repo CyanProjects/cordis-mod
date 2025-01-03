@@ -5,15 +5,17 @@
 [![npm](https://img.shields.io/npm/v/cordis?style=flat-square)](https://www.npmjs.com/package/cordis)
 [![GitHub](https://img.shields.io/github/license/cordiverse/cordis?style=flat-square)](https://github.com/cordiverse/cordis/blob/master/LICENSE)
 
-Cordis is an AOP framework for modern JavaScript applications. You can think of it as a kind of meta-framework as developers can build their own frameworks on top of it.
+Cordis is an AOP framework for modern JavaScript applications. You can think of
+it as a kind of meta-framework as developers can build their own frameworks on
+top of it.
 
 ```ts
 import { Context } from 'cordis'
 
 const ctx = new Context()
 
-ctx.plugin(plugin)              // use plugins
-ctx.on(event, callback)         // listen to events
+ctx.plugin(plugin) // use plugins
+ctx.on(event, callback) // listen to events
 ```
 
 ## Contents
@@ -47,7 +49,8 @@ import { Context } from 'cordis'
 const ctx = new Context()
 ```
 
-Almost every feature of cordis is based on contexts. We will see how to use them in the following sections.
+Almost every feature of cordis is based on contexts. We will see how to use them
+in the following sections.
 
 ### Events [↑](#contents)
 
@@ -55,7 +58,11 @@ Cordis has a built-in event model with lifecycle management.
 
 #### Listen to events [↑](#contents)
 
-To add an event listener, simply use `ctx.on()`, which is similar to the `EventEmitter` that comes with Node.js: the first parameter indicates the name of the event and the second parameter is the callback function. We also support similar methods `ctx.once()`, which is used to listen to events only once, and `ctx.off()`, which is used to cancel as event listeners.
+To add an event listener, simply use `ctx.on()`, which is similar to the
+`EventEmitter` that comes with Node.js: the first parameter indicates the name
+of the event and the second parameter is the callback function. We also support
+similar methods `ctx.once()`, which is used to listen to events only once, and
+`ctx.off()`, which is used to cancel as event listeners.
 
 ```ts
 ctx.on('some-event', callback)
@@ -63,7 +70,10 @@ ctx.once('some-event', callback)
 ctx.off('some-event', callback)
 ```
 
-One difference between cordis `Context` and Node.js `EventEmitter` is that both `ctx.on()` and `ctx.once()` returns a dispose function, which can be called to cancel the event listener. So you do not actually have to use `ctx.once()` and `ctx.off()`. Here is an example of add a listener that will only be called once:
+One difference between cordis `Context` and Node.js `EventEmitter` is that both
+`ctx.on()` and `ctx.once()` returns a dispose function, which can be called to
+cancel the event listener. So you do not actually have to use `ctx.once()` and
+`ctx.off()`. Here is an example of add a listener that will only be called once:
 
 ```ts
 const dispose = ctx.on('some-event', (...args) => {
@@ -74,14 +84,19 @@ const dispose = ctx.on('some-event', (...args) => {
 
 #### Trigger events [↑](#contents)
 
-In cordis, triggering an event can take many forms. Currently, we support four methods with some differences between them:
+In cordis, triggering an event can take many forms. Currently, we support four
+methods with some differences between them:
 
 - emit: calling all listeners at the same time
 - parallel: the asynchronous version of `emit`
-- bail: calling all listeners in the order they were registered; when a value other than `false`, `null` or `undefined` is returned, the value is returned and subsequent listeners will not be called
+- bail: calling all listeners in the order they were registered; when a value
+  other than `false`, `null` or `undefined` is returned, the value is returned
+  and subsequent listeners will not be called
 - serial: the synchronous version of `bail`
 
-The usage of these methods is also similar to `EventEmitter`. The first parameter is the event name, and the following parameters are passed to the listeners. Below is an example:
+The usage of these methods is also similar to `EventEmitter`. The first
+parameter is the event name, and the following parameters are passed to the
+listeners. Below is an example:
 
 ```ts
 ctx.emit('some-event', arg1, arg2, ...rest)
@@ -101,7 +116,8 @@ ctx.on('some-event', function (arg1, arg2, ...rest) {
 })
 ```
 
-An optional symbol `Context.filter` on `this` argument can be used to filter listeners:
+An optional symbol `Context.filter` on `this` argument can be used to filter
+listeners:
 
 ```ts
 thisArg[Context.filter] = (ctx) => {
@@ -112,13 +128,17 @@ thisArg[Context.filter] = (ctx) => {
 
 #### Application lifecycle [↑](#contents)
 
-There are some special events related to the application lifecycle. You can listen to them as if they were normal events, but they are not triggered by `ctx.emit()`.
+There are some special events related to the application lifecycle. You can
+listen to them as if they were normal events, but they are not triggered by
+`ctx.emit()`.
 
 - `ready`: triggered when the application starts
 - `dispose`: triggered when the context is unloaded
 - `fork`: triggered every time when the plugin is loaded
 
-The `ready` event is triggered when the application starts. If a `ready` listener is registered in an application that has already started, it will be called immediately. Below is an example:
+The `ready` event is triggered when the application starts. If a `ready`
+listener is registered in an application that has already started, it will be
+called immediately. Below is an example:
 
 ```ts
 ctx.on('ready', async () => {
@@ -142,7 +162,8 @@ ctx.on('ready', () => {
 It is recommended to wrap code in the `ready` event in the following scenarios:
 
 - contains asynchronous operations (for example IO-intensive tasks)
-- should be called after other plugins are ready (for example performance checks)
+- should be called after other plugins are ready (for example performance
+  checks)
 
 We will talk about `dispose` and `fork` events in the next section.
 
@@ -150,33 +171,43 @@ We will talk about `dispose` and `fork` events in the next section.
 
 A **plugin** is in one of three basic forms:
 
-- a function that accepts two parameters, of which the first is the plugin context, and the second is the provided options
+- a function that accepts two parameters, of which the first is the plugin
+  context, and the second is the provided options
 - a class that accepts above parameters
 - an object with an `apply` method in the form of the above function
 
-When a plugin is loaded, it is basically equivalent to calling the above function or class. Therefore, the following four ways of adding an event listener is basically equivalent:
+When a plugin is loaded, it is basically equivalent to calling the above
+function or class. Therefore, the following four ways of adding an event
+listener is basically equivalent:
 
 ```ts
 ctx.on(event, callback)
 
-ctx.plugin(ctx => ctx.on(event, callback))
+ctx.plugin((ctx) => ctx.on(event, callback))
 
 ctx.plugin({
-  apply: ctx => ctx.on(event, callback),
+  apply: (ctx) => ctx.on(event, callback),
 })
 
-ctx.plugin(class {
-  constructor(ctx) {
-    ctx.on(event, callback)
-  }
-})
+ctx.plugin(
+  class {
+    constructor(ctx) {
+      ctx.on(event, callback)
+    }
+  },
+)
 ```
 
-It seems that this just changes the way of writing the direct call, but plugins can help us organize complicated logics while managing the options, which can greatly improve code maintainability.
+It seems that this just changes the way of writing the direct call, but plugins
+can help us organize complicated logics while managing the options, which can
+greatly improve code maintainability.
 
 #### Plugin as a module [↑](#contents)
 
-It is recommended to write plugins as modules, specifically, as [default exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#default_import) or [namespace exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#namespace_import).
+It is recommended to write plugins as modules, specifically, as
+[default exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#default_import)
+or
+[namespace exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#namespace_import).
 
 ```ts
 // foo.ts (default export)
@@ -204,7 +235,8 @@ ctx.plugin(Bar)
 
 #### Unload a plugin [↑](#contents)
 
-`ctx.plugin()` returns a `EffectScope` instance. To unload a plugin, we can use the `dispose()` method of it:
+`ctx.plugin()` returns a `EffectScope` instance. To unload a plugin, we can use
+the `dispose()` method of it:
 
 ```ts
 // load a plugin
@@ -218,7 +250,8 @@ const fork = ctx.plugin((ctx) => {
 fork.dispose()
 ```
 
-Some plugins can be loaded multiple times. To unload every fork of a plugin without access to the `EffectScope` instance, we can use `ctx.registry`:
+Some plugins can be loaded multiple times. To unload every fork of a plugin
+without access to the `EffectScope` instance, we can use `ctx.registry`:
 
 ```ts
 // remove all forks of the plugin
@@ -228,9 +261,13 @@ ctx.registry.delete(plugin)
 
 #### Clear side effects [↑](#contents)
 
-The `dispose` event is triggered when the context is unloaded. It can be used to clean up plugins' side effects.
+The `dispose` event is triggered when the context is unloaded. It can be used to
+clean up plugins' side effects.
 
-Most of the built-in methods of `Context` are already implemented to be disposable (including `ctx.on()` and `ctx.plugin()`), so you do not need to handle these side effects manually. However, if some side effects are introduced by other means, a `dispose` listener is necessary.
+Most of the built-in methods of `Context` are already implemented to be
+disposable (including `ctx.on()` and `ctx.plugin()`), so you do not need to
+handle these side effects manually. However, if some side effects are introduced
+by other means, a `dispose` listener is necessary.
 
 Below is an example:
 
@@ -251,11 +288,14 @@ export function apply(ctx) {
 }
 ```
 
-In this example, without the `dispose` event, the port `80` will still be occupied after the plugin is unloaded. If the plugin is loaded a second time, the server will fail to start.
+In this example, without the `dispose` event, the port `80` will still be
+occupied after the plugin is unloaded. If the plugin is loaded a second time,
+the server will fail to start.
 
 #### Reusable plugins [↑](#contents)
 
-By default, a plugin is loaded only once. If we want to create a reusable plugin, we can use the `fork` event:
+By default, a plugin is loaded only once. If we want to create a reusable
+plugin, we can use the `fork` event:
 
 ```ts
 // an example reusable plugin
@@ -275,7 +315,11 @@ ctx.plugin(callback, { value: 'foo' })
 ctx.plugin(callback, { value: 'bar' })
 ```
 
-Note that the `fork` listener itself is a plugin function. You can also listen to `dispose` event inside `fork` listeners, which serves a different purpose: the inner `dispose` listener is called when the fork is unloaded, while the outer `dispose` listener is called when the whole plugin is unloaded (either via `ctx.registry.delete()` or when unloaded all forks).
+Note that the `fork` listener itself is a plugin function. You can also listen
+to `dispose` event inside `fork` listeners, which serves a different purpose:
+the inner `dispose` listener is called when the fork is unloaded, while the
+outer `dispose` listener is called when the whole plugin is unloaded (either via
+`ctx.registry.delete()` or when unloaded all forks).
 
 ```ts
 // an example reusable plugin
@@ -302,9 +346,12 @@ fork1.dispose()
 fork2.dispose()
 ```
 
-Also, you should never use methods from the outer `ctx` parameter because they are not bound to the fork and cannot be cleaned up when the fork is disposed. Instead, simply use the `ctx` parameter of the `fork` listener.
+Also, you should never use methods from the outer `ctx` parameter because they
+are not bound to the fork and cannot be cleaned up when the fork is disposed.
+Instead, simply use the `ctx` parameter of the `fork` listener.
 
-Finally, cordis provides a syntactic sugar for fully reusable plugins (i.e. plugins which only have fork listeners):
+Finally, cordis provides a syntactic sugar for fully reusable plugins (i.e.
+plugins which only have fork listeners):
 
 ```ts
 // mark the callback as fork listener
@@ -338,9 +385,13 @@ export default class MyPlugin {
 
 ### Service [↑](#contents)
 
-A **service** is an object that can be accessed by multiple contexts. Most of the contexts' functionalities come from services.
+A **service** is an object that can be accessed by multiple contexts. Most of
+the contexts' functionalities come from services.
 
-For ones who are familiar with IoC / DI, services provide an IoC (inversion of control), but is not implemented through DI (dependency injection). Cordis provides easy access to services within the context through TypeScript's unique mechanism of declaration merging.
+For ones who are familiar with IoC / DI, services provide an IoC (inversion of
+control), but is not implemented through DI (dependency injection). Cordis
+provides easy access to services within the context through TypeScript's unique
+mechanism of declaration merging.
 
 #### Built-in services [↑](#contents)
 
@@ -354,7 +405,8 @@ You can access these services from any contexts.
 
 #### Use services [↑](#contents)
 
-Some plugins may depend on certain services. For example, supposing we have a service called `database`, and we want to use it in a plugin:
+Some plugins may depend on certain services. For example, supposing we have a
+service called `database`, and we want to use it in a plugin:
 
 ```ts
 export function apply(ctx) {
@@ -363,9 +415,13 @@ export function apply(ctx) {
 }
 ```
 
-Trying to load this plugin is likely to result in an error because `ctx.database` may be `undefined` when the plugin is loaded. The way to fix this problem depends on when and how the service is used.
+Trying to load this plugin is likely to result in an error because
+`ctx.database` may be `undefined` when the plugin is loaded. The way to fix this
+problem depends on when and how the service is used.
 
-If the service is only optional needed when the application is running (e.g. referenced in some event listener), we can simply check the availability of the service before using it:
+If the service is only optional needed when the application is running (e.g.
+referenced in some event listener), we can simply check the availability of the
+service before using it:
 
 ```ts
 export function apply(ctx) {
@@ -377,7 +433,10 @@ export function apply(ctx) {
 }
 ```
 
-However, If a plugin completely depends on the service, we cannot just check the service in the plugin callback, because when the plugin is loaded, the service may not be available yet. To make sure that the plugin is loaded only when the service is available, we can use a special property called `inject`:
+However, If a plugin completely depends on the service, we cannot just check the
+service in the plugin callback, because when the plugin is loaded, the service
+may not be available yet. To make sure that the plugin is loaded only when the
+service is available, we can use a special property called `inject`:
 
 ```ts
 export const inject = ['database']
@@ -400,13 +459,15 @@ export default class MyPlugin {
 }
 ```
 
-`inject` is a list of service dependencies. If a service is a dependency of a plugin, it means:
+`inject` is a list of service dependencies. If a service is a dependency of a
+plugin, it means:
 
 - the plugin will not be loaded until the service becomes truthy
 - the plugin will be unloaded as soon as the service changes
 - if the changed value is still truthy, the plugin will be reloaded
 
-For plugins whose functions depend on a service, we also provide a syntactic sugar `ctx.inject()`:
+For plugins whose functions depend on a service, we also provide a syntactic
+sugar `ctx.inject()`:
 
 ```ts
 ctx.inject(['database'], (ctx) => {
@@ -422,11 +483,13 @@ ctx.plugin({
 })
 ```
 
-Similar to fork callbacks, always use the `ctx` parameter of the callback instead of the outer `ctx` for disposability.
+Similar to fork callbacks, always use the `ctx` parameter of the callback
+instead of the outer `ctx` for disposability.
 
 #### Write services [↑](#contents)
 
-Custom services can be loaded as plugins. To create a service plugin, simply derive a class from `Service`:
+Custom services can be loaded as plugins. To create a service plugin, simply
+derive a class from `Service`:
 
 ```ts
 import { Service } from 'cordis'
@@ -442,14 +505,17 @@ class CustomService extends Service {
 }
 ```
 
-The second parameter of the constructor is the service name. After loading the service plugin, we can access the custom service through `ctx.custom`:
+The second parameter of the constructor is the service name. After loading the
+service plugin, we can access the custom service through `ctx.custom`:
 
 ```ts
 ctx.plugin(CustomService)
 ctx.custom.method()
 ```
 
-The third parameter of the constructor is a boolean value of whether the service is immediately available. If it is `false` (by default), the service will only be available after the application is started.
+The third parameter of the constructor is a boolean value of whether the service
+is immediately available. If it is `false` (by default), the service will only
+be available after the application is started.
 
 There are also some abstract methods for lifecycle events:
 
@@ -470,7 +536,9 @@ class CustomService extends Service {
 
 #### Write disposable methods [↑](#contents)
 
-It is good practice to write disposable methods for services so that plugins can use them without worrying about the cleanup of resources. Take a simple list service as an example:
+It is good practice to write disposable methods for services so that plugins can
+use them without worrying about the cleanup of resources. Take a simple list
+service as an example:
 
 ```ts
 class ListService extends Service {
@@ -501,10 +569,16 @@ class ListService extends Service {
 
 `ListService` provides two methods: `addItem` and `removeItem`.
 
-- The `addItem` method adds an item to the list and returns a dispose function which can be used to remove the item from the list. When the caller context is disposed, the disposable function will be automatically called.
-- The `removeItem` method removes an item from the list and returns a boolean value indicating whether the item is successfully removed.
+- The `addItem` method adds an item to the list and returns a dispose function
+  which can be used to remove the item from the list. When the caller context is
+  disposed, the disposable function will be automatically called.
+- The `removeItem` method removes an item from the list and returns a boolean
+  value indicating whether the item is successfully removed.
 
-In the above example, `addItem` is implemented as disposable via `this.ctx.collect()`. `caller` is a special property which always points to the last context which access the service. `ctx.collect()` accepts two parameters: the first is the name of disposable, the second is the callback function.
+In the above example, `addItem` is implemented as disposable via
+`this.ctx.collect()`. `caller` is a special property which always points to the
+last context which access the service. `ctx.collect()` accepts two parameters:
+the first is the name of disposable, the second is the callback function.
 
 #### Service isolation [↑](#contents)
 
@@ -513,43 +587,57 @@ In the above example, `addItem` is implemented as disposable via `this.ctx.colle
 By default, a service is available in all contexts. Below is an example:
 
 ```ts
-ctx.custom                      // undefined
+ctx.custom // undefined
 // register the service with a plugin
 const fork = ctx.plugin(CustomService)
-ctx.custom                      // CustomService
+ctx.custom // CustomService
 // unload the service plugin
 fork.dispose()
-ctx.custom                      // undefined
+ctx.custom // undefined
 ```
 
-Registering multiple services will only override themselves. In order to limit the scope of a service (so that multiple services may exist at the same time), simply create an isolated scope:
+Registering multiple services will only override themselves. In order to limit
+the scope of a service (so that multiple services may exist at the same time),
+simply create an isolated scope:
 
 ```ts
 const ctx1 = ctx.isolate('foo')
 const ctx2 = ctx.isolate('bar')
 
 ctx.foo = { value: 1 }
-ctx1.foo                        // undefined
-ctx2.foo                        // { value: 1 }
+ctx1.foo // undefined
+ctx2.foo // { value: 1 }
 
 ctx1.bar = { value: 2 }
-ctx.bar                         // { value: 2 }
-ctx2.bar                        // undefined
+ctx.bar // { value: 2 }
+ctx2.bar // undefined
 ```
 
-`ctx.isolate()` accepts a parameter `key` and returns a new context. Service named `key` will be isolated in the new context, while other services are still shared with the parent context.
+`ctx.isolate()` accepts a parameter `key` and returns a new context. Service
+named `key` will be isolated in the new context, while other services are still
+shared with the parent context.
 
-> Note: there is an edge case when using service isolation, service dependencies and `fork` events at the same time. Forks from a partially reusable plugin are **not** responsive to isolated service changes, because it may cause unexpected reloading across forks. If you want to write reusable plugin with service dependencies, just use `reusable` property instead of listening to `fork` event.
+> Note: there is an edge case when using service isolation, service dependencies
+> and `fork` events at the same time. Forks from a partially reusable plugin are
+> **not** responsive to isolated service changes, because it may cause
+> unexpected reloading across forks. If you want to write reusable plugin with
+> service dependencies, just use `reusable` property instead of listening to
+> `fork` event.
 
 ### Context [↑](#contents)
 
-Context provides API for framework developers rather than users. You can create your own framework based on cordis with context API.
+Context provides API for framework developers rather than users. You can create
+your own framework based on cordis with context API.
 
 #### Services and mixins [↑](#contents)
 
-`Context.service()` is a static method that registers a service. If you write your service as a derived class, you do not need to call this method because cordis will automatically register the service.
+`Context.service()` is a static method that registers a service. If you write
+your service as a derived class, you do not need to call this method because
+cordis will automatically register the service.
 
-This method is useful for framework developers who may want to provide built-in services or just declare abstract services which may not be implemented by plugins.
+This method is useful for framework developers who may want to provide built-in
+services or just declare abstract services which may not be implemented by
+plugins.
 
 ```ts
 // declare an abstract service
@@ -561,9 +649,11 @@ function apply(ctx) {
 }
 ```
 
-`Context.mixin()` is a static method that allows you to delegate properties and methods to the context.
+`Context.mixin()` is a static method that allows you to delegate properties and
+methods to the context.
 
-> Note: please don't abuse this feature, as adding a lot of mixins can lead to name conflicts.
+> Note: please don't abuse this feature, as adding a lot of mixins can lead to
+> name conflicts.
 
 ```ts
 Context.mixin('scope', {
@@ -572,7 +662,8 @@ Context.mixin('scope', {
 })
 ```
 
-Mixins from services will still support service features such as [disposable](#write-disposable-methods-) and [isolation](#service-isolation-).
+Mixins from services will still support service features such as
+[disposable](#write-disposable-methods-) and [isolation](#service-isolation-).
 
 ## API
 
@@ -583,7 +674,8 @@ Mixins from services will still support service features such as [disposable](#w
 - meta: `Partial<Context.Meta>` additional properties
 - returns: `Context`
 
-Create a new context with the current context as the prototype. Properties specified in `meta` will be assigned to the new context.
+Create a new context with the current context as the prototype. Properties
+specified in `meta` will be assigned to the new context.
 
 #### ctx.isolate(key)
 
@@ -592,13 +684,16 @@ Create a new context with the current context as the prototype. Properties speci
 - key: `string` service name
 - returns: `Context`
 
-Create a new context with the current context as the prototype. Service named `key` will be isolated in the new context, while other services are still shared with the parent context.
+Create a new context with the current context as the prototype. Service named
+`key` will be isolated in the new context, while other services are still shared
+with the parent context.
 
 See: [Service isolation](#service-isolation-)
 
 ### Events
 
-`ctx.events` is a built-in service of event model and lifecycle. Most of its methods are also directly accessible in the context.
+`ctx.events` is a built-in service of event model and lifecycle. Most of its
+methods are also directly accessible in the context.
 
 #### ctx.emit(thisArg?, event, ...param)
 
@@ -607,7 +702,10 @@ See: [Service isolation](#service-isolation-)
 - param: `any[]` event parameters
 - returns: `void`
 
-Trigger the event called `event`, calling all associated listeners **synchronously** at the same time, passing the supplied arguments to each. If the first argument is an object, it will be used as `this` when executing each listener.
+Trigger the event called `event`, calling all associated listeners
+**synchronously** at the same time, passing the supplied arguments to each. If
+the first argument is an object, it will be used as `this` when executing each
+listener.
 
 <!-- An [`internal/warn`](#internalwarn) event is triggered if a listener throws an error or returns a rejected promise. -->
 
@@ -618,7 +716,10 @@ Trigger the event called `event`, calling all associated listeners **synchronous
 - param: `any[]` event parameters
 - returns: `Promise<void>`
 
-Trigger the event called `event`, calling all associated listeners **asynchronously** at the same time, passing the supplied arguments to each. If the first argument is an object, it will be used as `this` when executing each listener.
+Trigger the event called `event`, calling all associated listeners
+**asynchronously** at the same time, passing the supplied arguments to each. If
+the first argument is an object, it will be used as `this` when executing each
+listener.
 
 <!-- An [`internal/warn`](#internalwarn) event is triggered if a listener throws an error or returns a rejected promise. -->
 
@@ -629,9 +730,15 @@ Trigger the event called `event`, calling all associated listeners **asynchronou
 - param: `any[]` event parameters
 - returns: `any`
 
-Trigger the event called `event`, calling all associated listeners **synchronously** in the order they were registered, passing the supplied arguments to each. If the first argument is an object, it will be used as `this` when executing each listener.
+Trigger the event called `event`, calling all associated listeners
+**synchronously** in the order they were registered, passing the supplied
+arguments to each. If the first argument is an object, it will be used as `this`
+when executing each listener.
 
-If any listener returns a value other than `false`, `null` or `undefined`, that value is returned. If all listeners return `false`, `null` or `undefined`, an `undefined` is returned. In either case, subsequent listeners will not be called.
+If any listener returns a value other than `false`, `null` or `undefined`, that
+value is returned. If all listeners return `false`, `null` or `undefined`, an
+`undefined` is returned. In either case, subsequent listeners will not be
+called.
 
 #### ctx.serial(thisArg?, event, ...param)
 
@@ -640,9 +747,16 @@ If any listener returns a value other than `false`, `null` or `undefined`, that 
 - param: `any[]` event parameters
 - returns: `Promise<any>`
 
-Trigger the event called `event`, calling all associated listeners **asynchronously** in the order they were registered, passing the supplied arguments to each. If the first argument is an object, it will be used as `this` when executing each listener.
+Trigger the event called `event`, calling all associated listeners
+**asynchronously** in the order they were registered, passing the supplied
+arguments to each. If the first argument is an object, it will be used as `this`
+when executing each listener.
 
-If any listener is fulfilled with a value other than `false`, `null` or `undefined`, the returned promise is fulfilled with that value. If all listeners are fulfilled with `false`, `null` or `undefined`, the returned promise is fulfilled with `undefined`. In either case, subsequent listeners will not be called.
+If any listener is fulfilled with a value other than `false`, `null` or
+`undefined`, the returned promise is fulfilled with that value. If all listeners
+are fulfilled with `false`, `null` or `undefined`, the returned promise is
+fulfilled with `undefined`. In either case, subsequent listeners will not be
+called.
 
 #### ctx.on()
 
@@ -660,7 +774,9 @@ If any listener is fulfilled with a value other than `false`, `null` or `undefin
 
 ### Registry
 
-`ctx.registry` is a built-in service of plugin management. It is actually a subclass of `Map<Plugin, MainScope>`, so you can access plugin runtime via methods like `ctx.registry.get()` and `ctx.registry.delete()`.
+`ctx.registry` is a built-in service of plugin management. It is actually a
+subclass of `Map<Plugin, MainScope>`, so you can access plugin runtime via
+methods like `ctx.registry.get()` and `ctx.registry.delete()`.
 
 #### ctx.plugin(plugin, config?)
 
@@ -700,7 +816,8 @@ An auto-incrementing unique identifier for the effect scope.
 
 - type: [`MainScope`](#mainscope)
 
-The plugin runtime associated with the effect scope. If the scope is a runtime, then this property refers to itself.
+The plugin runtime associated with the effect scope. If the scope is a runtime,
+then this property refers to itself.
 
 #### scope.parent
 
@@ -720,7 +837,8 @@ The plugin runtime associated with the effect scope. If the scope is a runtime, 
 
 ### MainScope
 
-MainScope is a subclass of [`EffectScope`](#effectscope), representing the main scope of a plugin.
+MainScope is a subclass of [`EffectScope`](#effectscope), representing the main
+scope of a plugin.
 
 It can be accessed via `ctx.scope.main` or passed-in in some events.
 
@@ -738,13 +856,16 @@ It can be accessed via `ctx.scope.main` or passed-in in some events.
 
 #### ready()
 
-The `ready` event is triggered when the application starts. If a `ready` listener is registered in an application that has already started, it will be called immediately.
+The `ready` event is triggered when the application starts. If a `ready`
+listener is registered in an application that has already started, it will be
+called immediately.
 
 See: [Application lifecycle](#application-lifecycle-)
 
 #### dispose()
 
-The `dispose` event is triggered when the context is unloaded. It can be used to clean up plugins' side effects.
+The `dispose` event is triggered when the context is unloaded. It can be used to
+clean up plugins' side effects.
 
 See: [Clear side effects](#clear-side-effects-)
 
@@ -753,7 +874,8 @@ See: [Clear side effects](#clear-side-effects-)
 - ctx: `Context`
 - config: `any`
 
-The `fork` event is triggered when the plugin is loaded. It is used to create reusable plugins.
+The `fork` event is triggered when the plugin is loaded. It is used to create
+reusable plugins.
 
 See: [Reusable plugins](#reusable-plugins-)
 
