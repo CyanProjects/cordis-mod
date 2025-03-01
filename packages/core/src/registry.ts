@@ -98,10 +98,7 @@ export namespace Plugin {
 }
 
 export function resolveConfig(runtime: Plugin.Runtime, config: any) {
-  if (runtime.Config) {
-    config = runtime.Config(config)
-  }
-  return config ?? {}
+  return runtime.Config ? runtime.Config(config) : config
 }
 
 export type Spread<T> = undefined extends T ? [config?: T] : [config: T]
