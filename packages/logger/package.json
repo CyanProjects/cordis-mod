@@ -1,7 +1,7 @@
 {
   "name": "@cordisjs/logger",
   "description": "Logger service for cordis",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "main": "src/index.ts",
   "exports": {
@@ -37,10 +37,10 @@
     }
   },
   "devDependencies": {
-    "@cordisjs/core": "^4.0.0-alpha.0"
+    "@cordisjs/core": "^4.0.0-alpha.1"
   },
   "peerDependencies": {
-    "@cordisjs/core": "^4.0.0-alpha.0"
+    "@cordisjs/core": "^4.0.0-alpha.1"
   },
   "dependencies": {
     "cosmokit": "^1.6.3",
