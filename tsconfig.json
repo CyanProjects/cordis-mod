@@ -11,5 +11,6 @@
       "@cordisjs/*": ["packages/*/src"]
     }
   },
+  "exclude": ["./**/tests/**"],
   "files": []
 }

@@ -217,8 +217,8 @@ class Registry<C extends Context = Context> {
     const callback = this.resolve(plugin)
     if (!callback) {
       throw new Error(
-        'invalid plugin, expect function or object with an "apply" method, received ' +
-          typeof plugin,
+        `invalid plugin, expect function or object with an "apply" method, received ${typeof plugin}`,
+        { cause: plugin }
       )
     }
     this.ctx.scope.assertActive()

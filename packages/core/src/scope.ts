@@ -173,8 +173,7 @@ export class EffectScope<C extends Context = Context> {
       await composeError(
         async () => {
           if (isConstructor(this.runtime!.callback)) {
-            // eslint-disable-next-line new-cap
-            const instance = new this.runtime!.callback(this.ctx, this.config)
+            const instance = new (this.runtime!).callback(this.ctx, this.config)
             for (const hook of instance?.[symbols.initHooks] ?? []) {
               hook()
             }
