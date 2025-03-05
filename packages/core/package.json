@@ -27,10 +27,10 @@
   "devDependencies": {
     "@types/chai": "^5.0.1",
     "@types/chai-as-promised": "^8.0.1",
-    "chai": "^5.1.2",
-    "chai-as-promised": "^8.0.0"
+    "chai": "^5.2.0",
+    "chai-as-promised": "^8.0.1"
   },
   "dependencies": {
-    "cosmokit": "^1.6.3"
+    "cosmokit": "^1.7.2"
   }
 }
