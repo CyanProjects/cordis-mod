@@ -1,0 +1,46 @@
+{
+  "name": "cordis-plugin-scheduler",
+  "version": "0.3.4",
+  "files": ["mod.ts", "utils.ts", "state.ts", "waiter.ts", "dist"],
+  "type": "module",
+  "license": "BSD-3-Clause",
+  "exports": {
+    ".": {
+      "bun": "./mod.ts",
+      "deno": "./mod.ts",
+      "node": "./dist/mod.js",
+      "default": "./dist/mod.js",
+      "types": "./dist/mod.d.ts"
+    },
+    "./retry": {
+      "bun": "./utils.ts",
+      "deno": "./utils.ts",
+      "node": "./dist/utils.js",
+      "default": "./dist/utils.js",
+      "types": "./dist/utils.d.ts"
+    },
+    "./state": {
+      "bun": "./state/mod.ts",
+      "deno": "./state/mod.ts",
+      "node": "./dist/state/mod.js",
+      "default": "./dist/state/mod.js",
+      "types": "./dist/state/mod.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && bun build mod.ts state/mod.ts utils.ts --sourcemap=inline -e @cordisjs/core -e cosmokit -e schemastery -e linked-list --outdir dist/"
+  },
+  "cordis": {
+    "service": {
+      "implements": ["scheduler"]
+    }
+  },
+  "peerDependencies": {
+    "@cordisjs/core": "^4.0.0-alpha.2"
+  },
+  "dependencies": {
+    "linked-list": "^3.1.0",
+    "schemastery": "^3.16.0",
+    "cosmokit": "~1"
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/async@*": "1.0.11"
+  },
+  "jsr": {
+    "@std/async@1.0.11": {
+      "integrity": "eee0d3405275506638a9c8efaa849cf0d35873120c69b7caa1309c9a9e5b6f85"
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@cordisjs/eslint-config@^1.1.1",
+        "npm:@sinonjs/fake-timers@^6.0.1",
+        "npm:@types/node@^22.13.9",
+        "npm:@types/sinonjs__fake-timers@^6.0.4",
+        "npm:c8@^7.14.0",
+        "npm:esbuild-register@^3.6.0",
+        "npm:eslint@^8.57.1",
+        "npm:mocha@^9.2.2",
+        "npm:shx@~0.3.4",
+        "npm:typescript@^5.8.2",
+        "npm:yml-register@^1.2.5"
+      ]
+    },
+    "members": {
+      "packages/cordis": {
+        "packageJson": {
+          "dependencies": [
+            "npm:cac@^6.7.14",
+            "npm:cosmokit@^1.7.2",
+            "npm:kleur@^4.1.5",
+            "npm:reggol@^1.7.1",
+            "npm:schemastery@^3.16.1"
+          ]
+        }
+      },
+      "packages/core": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@types/chai-as-promised@^8.0.1",
+            "npm:@types/chai@^5.0.1",
+            "npm:chai-as-promised@^8.0.1",
+            "npm:chai@^5.2.0",
+            "npm:cosmokit@^1.7.2"
+          ]
+        }
+      },
+      "packages/hmr": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@babel/code-frame@^7.26.2",
+            "npm:@cordisjs/plugin-timer@^1.0.0-alpha.0",
+            "npm:@types/babel__code-frame@^7.0.6",
+            "npm:chokidar@^3.6.0",
+            "npm:cordis@^4.0.0-alpha.1",
+            "npm:cosmokit@^1.7.2",
+            "npm:esbuild@~0.24.2"
+          ]
+        }
+      },
+      "packages/logger": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@cordisjs/core@^4.0.0-alpha.1",
+            "npm:cosmokit@^1.7.2",
+            "npm:reggol@^1.7.1"
+          ]
+        }
+      },
+      "packages/schema": {
+        "packageJson": {
+          "dependencies": [
+            "npm:cordis@^4.0.0-alpha.1",
+            "npm:cosmokit@^1.7.2",
+            "npm:schemastery@^3.16.1"
+          ]
+        }
+      },
+      "packages/timer": {
+        "packageJson": {
+          "dependencies": [
+            "npm:cordis@^4.0.0-alpha.1",
+            "npm:cosmokit@^1.7.2"
+          ]
+        }
+      },
+      "plugins/scheduler": {
+        "packageJson": {
+          "dependencies": [
+            "npm:cosmokit@1",
+            "npm:linked-list@^3.1.0",
+            "npm:schemastery@^3.16.0"
+          ]
+        }
+      }
+    }
+  }
+}

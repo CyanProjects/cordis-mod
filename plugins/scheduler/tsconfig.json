@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "lib": ["ESNext", "ESNext.Promise"],
+    "allowImportingTsExtensions": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "emitDeclarationOnly": true
+  },
+  "include": ["*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
