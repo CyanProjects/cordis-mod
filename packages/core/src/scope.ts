@@ -1,9 +1,9 @@
-import { Dict, isNullable } from 'cosmokit'
-import { Context } from './context.ts'
-import { Inject, Plugin, resolveConfig } from './registry.ts'
+import { type Dict, isNullable } from 'cosmokit'
+import type { Context } from './context.ts'
+import { type Inject, type Plugin, resolveConfig } from './registry.ts'
 import {
-  composeError,
   DisposableList,
+  composeError,
   isConstructor,
   symbols,
 } from './utils.ts'
@@ -21,16 +21,19 @@ export type Effect<T = void> = () =>
   | Disposable<T>
   | Iterable<Disposable, void, void>
 
-export const enum ScopeStatus {
-  PENDING,
-  LOADING,
-  ACTIVE,
-  FAILED,
-  DISPOSED,
+export enum ScopeStatus {
+  PENDING = 0,
+  LOADING = 1,
+  ACTIVE = 2,
+  FAILED = 3,
+  DISPOSED = 4,
 }
 
 export class CordisError extends Error {
-  constructor(public code: CordisError.Code, message?: string) {
+  constructor(
+    public code: CordisError.Code,
+    message?: string,
+  ) {
     super(message ?? CordisError.Code[code])
   }
 }
@@ -173,7 +176,9 @@ export class EffectScope<C extends Context = Context> {
       await composeError(
         async () => {
           if (isConstructor(this.runtime!.callback)) {
-            const instance = new (this.runtime!).callback(this.ctx, this.config)
+            const ctor = this.runtime!.callback
+            // eslint-disable-next-line new-cap
+            const instance = new ctor(this.ctx, this.config)
             for (const hook of instance?.[symbols.initHooks] ?? []) {
               hook()
             }

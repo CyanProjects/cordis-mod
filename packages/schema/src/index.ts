@@ -1,5 +1,5 @@
-import { Context, Service } from 'cordis'
-import Schema from 'schemastery'
+import { type Context, Service } from 'cordis'
+import type Schema from 'schemastery'
 
 export { default as Schema, default as z } from 'schemastery'
 

@@ -1,6 +1,6 @@
 import util from 'node:util'
-import type { WaiterChain } from './waiter.ts'
 import { Tracker } from '../../tracker.ts'
+import type { WaiterChain } from './waiter.ts'
 
 export default class $seat {
   tag: string | null = null
@@ -33,8 +33,9 @@ export default class $seat {
     if (this.#working) throw new Error('seat already taken')
     this.#working = true
     this.tag = tag
-    Tracker.promise(after, 'semaphore::Seat::use@finally')
-      .finally(() => this.#done())
+    Tracker.promise(after, 'semaphore::Seat::use@finally').finally(() =>
+      this.#done(),
+    )
   }
 
   [util.inspect.custom]() {

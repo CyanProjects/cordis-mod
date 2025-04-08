@@ -1,3 +1,5 @@
+import type { Awaitable } from 'cosmokit'
+
 export class WorkerFate {
   static CONTINUE = Symbol.for('kra.scheduler.worker.continue')
   static KILL = Symbol.for('kra.scheduler.worker.stop')
@@ -18,8 +20,8 @@ export class WorkerFate {
     if (decide) resolve(decide)
   }
 
-  found(): Promise<symbol> {
-    return this.#decision
+  async found(): Promise<symbol> {
+    return await this.#decision
   }
 
   decide(decision: symbol, next?: Promise<WorkerFate>) {
@@ -33,11 +35,21 @@ export class WorkerFate {
   }
 }
 
+export async function futureOf(fate: Awaitable<WorkerFate>) {
+  return Promise.any([
+    (await fate).found().then(() => fate),
+    (await fate).next(),
+  ])
+}
+
 export async function decide(
   fate: Promise<WorkerFate>,
-  defaulted: WorkerFate | symbol = WorkerFate.CONTINUE
+  defaulted: WorkerFate | symbol = WorkerFate.CONTINUE,
 ) {
-  const result = await Promise.any([fate, WorkerFate.decided(defaulted)])
+  const result = await Promise.any([
+    futureOf(fate),
+    WorkerFate.decided(defaulted),
+  ])
   return await result.found()
 }
 

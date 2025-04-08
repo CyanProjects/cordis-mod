@@ -1,9 +1,9 @@
 import { symbols } from '@cordisjs/core'
-import { withRetry } from '../utils.ts'
-import type { Awaitable } from 'cosmokit'
+import type { Promisify } from 'cosmokit'
 import { Tracker } from '../tracker.ts'
+import { withRetry } from '../utils.ts'
 
-export type Callback<T> = () => Awaitable<T>
+export type Callback<T> = () => T | PromiseLike<T>
 
 declare module '@cordisjs/core' {
   interface Context {
@@ -21,31 +21,41 @@ export abstract class SchedulerState {
   abstract set cap(newCap: number)
 
   withRetry: typeof withRetry = function $withRetry(fn, tries, wait) {
-    return withRetry(fn, tries, Tracker.callback(
-      wait ?? this.period.bind(this),
-      'SchedulerState::withRetry@wait'
-    ))
-  }
-
-  limited(): never {
-    throw new Error('`SchedulerState::limited()` is removed, use `ScheduleState::throttled()` instead')
-  }
-
-  throttled<T>(iterable: Iterable<Callback<T>>, period?: number): Promise<T[]> {
-    return Promise.all(
-      Array.from(iterable, (callback) => Tracker.promise(
-        this.period(callback.name, period).then(callback),
-        'SchedulerState::throttled@promise'
-      )),
+    return withRetry(
+      fn,
+      tries,
+      Tracker.callback(
+        wait ?? this.period.bind(this),
+        'SchedulerState::withRetry@wait',
+      ),
     )
   }
 
-  all<T>(iterable: Iterable<Callback<T>>): Promise<T[]> {
+  limited(): never {
+    throw new Error(
+      '`SchedulerState::limited()` is removed, use `ScheduleState::throttled()` instead',
+    )
+  }
+
+  throttled<T>(iterable: Iterable<Callback<T>>, period?: number): Promise<Awaited<T>[]> {
     return Promise.all(
-      Array.from(iterable, (callback) => Tracker.promise(
-        this.completancy(callback),
-        'SchedulerState::all@promise'
-      )),
+      Array.from(iterable, (callback) =>
+        <Promise<T>>Tracker.promise(
+          this.period(callback.name, period).then(callback),
+          'SchedulerState::throttled@promise',
+        ),
+      ),
+    )
+  }
+
+  all<T>(iterable: Iterable<Callback<T>>): Promise<Awaited<T>[]> {
+    return Promise.all(
+      Array.from(iterable, (callback) =>
+        <Promise<T>>Tracker.promise(
+          this.completancy(callback),
+          'SchedulerState::all@promise',
+        ),
+      ),
     )
   }
 
@@ -54,7 +64,7 @@ export abstract class SchedulerState {
   abstract period(tag: string): Promise<void>
   abstract period(): Promise<void>
 
-  abstract completancy<T>(callback: Callback<T>): Promise<T>
+  abstract completancy<T>(callback: Callback<T>): Promisify<T>
 
   abstract next(block: Promise<unknown>): Promise<void>
   abstract next(tag: string, block: Promise<unknown>): Promise<void>

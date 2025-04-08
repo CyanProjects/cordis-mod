@@ -1,11 +1,11 @@
+import assert from 'node:assert'
 import { mock } from 'node:test'
 import {
-  FakeTimerInstallOpts,
+  type FakeTimerInstallOpts,
+  type InstalledClock,
   install,
-  InstalledClock,
 } from '@sinonjs/fake-timers'
 import { Context } from 'cordis'
-import assert from 'node:assert'
 import Timer from '../src/index.js'
 
 declare module 'cordis' {
@@ -23,7 +23,9 @@ function withContext(
       const ctx = new Context()
       ctx.clock = install(config)
       ctx.plugin(Timer)
-      callback(ctx).then(resolve, reject).finally(() => ctx.clock.uninstall())
+      callback(ctx)
+        .then(resolve, reject)
+        .finally(() => ctx.clock.uninstall())
     })
 }
 

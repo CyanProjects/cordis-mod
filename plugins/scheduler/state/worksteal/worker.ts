@@ -1,16 +1,22 @@
-import type { WorkQueue } from './queue.ts'
-import WorkerFate, { decide as decideMy } from './fate.ts'
 import { Tracker } from '../../tracker.ts'
 import { TASK_NOTIFY } from './constants.ts'
+import WorkerFate, { decide as decideMy } from './fate.ts'
+import type { WorkQueue } from './queue.ts'
 
-export async function worker(id: number, fate: Promise<WorkerFate>, state: Int32Array, queue: WorkQueue) {
-  let { value: newTask } = Atomics.waitAsync(state, TASK_NOTIFY, state[0])
+export async function worker(
+  id: number,
+  fate: Promise<WorkerFate>,
+  shared: Int32Array,
+  queue: WorkQueue,
+) {
+  let { value: newTask } = Atomics.waitAsync(shared, TASK_NOTIFY, shared[0])
 
   while (await newTask) {
     const task = queue.get()
     await Tracker.promise(
       task.call(),
-      'worksteal::worker::worker@task.call', `worker-${id}`
+      'worksteal::worker::worker@task.call',
+      `worker-${id}`,
     )
     switch (await decideMy(fate)) {
       case WorkerFate.KILL:
@@ -18,7 +24,8 @@ export async function worker(id: number, fate: Promise<WorkerFate>, state: Int32
       case WorkerFate.CONTINUE:
         break
     }
-    ; ({ value: newTask } = Atomics.waitAsync(state, TASK_NOTIFY, state[0]))
+    if (queue.has()) continue
+    ;({ value: newTask } = Atomics.waitAsync(shared, TASK_NOTIFY, shared[0]))
   }
   await fate
 }

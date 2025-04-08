@@ -1,5 +1,6 @@
-import { defineProperty, Dict, isNullable } from 'cosmokit'
-import { Context } from './context.ts'
+import { type Dict, defineProperty, isNullable } from 'cosmokit'
+import type { Context } from './context.ts'
+import { type EffectScope, ScopeStatus } from './scope.ts'
 import {
   getTraceable,
   isObject,
@@ -7,7 +8,6 @@ import {
   symbols,
   withProps,
 } from './utils.ts'
-import { EffectScope, ScopeStatus } from './scope.ts'
 
 declare module './context.ts' {
   interface Context {
@@ -63,7 +63,8 @@ class ReflectService {
       ['prototype', 'then', 'registry', 'events', 'reflect', 'scope'].includes(
         name,
       )
-    ) return
+    )
+      return
     // Case 2: `$` or `_` prefix
     if (name[0] === '$' || name[0] === '_') return
     // Case 3: access directly from root
@@ -244,9 +245,8 @@ class ReflectService {
     const entries = Array.isArray(mixins)
       ? mixins.map((key) => [key, key])
       : Object.entries(mixins)
-    const getTarget = typeof source === 'string'
-      ? (ctx: Context) => ctx[source]
-      : () => source
+    const getTarget =
+      typeof source === 'string' ? (ctx: Context) => ctx[source] : () => source
     const disposables = entries.map(([key, value]) => {
       return this._accessor(value, {
         get(receiver) {

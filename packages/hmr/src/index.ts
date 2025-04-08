@@ -1,11 +1,11 @@
-import { Context, Plugin, Service, z } from 'cordis'
-import { Dict, makeArray } from 'cosmokit'
-import { ModuleJob, ModuleLoader } from 'cordis/loader'
-import { FSWatcher, watch, WatchOptions } from 'chokidar'
 import { relative, resolve } from 'node:path'
-import { handleError } from './error.ts'
-import {} from '@cordisjs/plugin-timer'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import {} from '@cordisjs/plugin-timer'
+import { type FSWatcher, type WatchOptions, watch } from 'chokidar'
+import { type Context, type Plugin, Service, z } from 'cordis'
+import type { ModuleJob, ModuleLoader } from 'cordis/loader'
+import { type Dict, makeArray } from 'cosmokit'
+import { handleError } from './error.ts'
 import enUS from './locales/en-US.yml'
 import zhCN from './locales/zh-CN.yml'
 
@@ -23,9 +23,12 @@ async function loadDependencies(job: ModuleJob, ignored = new Set<string>()) {
   const dependencies = new Set<string>()
   async function traverse(job: ModuleJob) {
     if (
-      ignored.has(job.url) || dependencies.has(job.url) ||
-      job.url.startsWith('node:') || job.url.includes('/node_modules/')
-    ) return
+      ignored.has(job.url) ||
+      dependencies.has(job.url) ||
+      job.url.startsWith('node:') ||
+      job.url.includes('/node_modules/')
+    )
+      return
     dependencies.add(job.url)
     const children = await job.linked
     await Promise.all(Array.prototype.map.call(children, traverse))
@@ -72,7 +75,10 @@ class Hmr extends Service {
   /** stashed changes */
   private stashed = new Set<string>()
 
-  constructor(ctx: Context, public config: Hmr.Config) {
+  constructor(
+    ctx: Context,
+    public config: Hmr.Config,
+  ) {
     super(ctx, 'hmr')
     if (!this.ctx.loader.internal) {
       throw new Error('--expose-internals is required for HMR service')
@@ -152,28 +158,36 @@ class Hmr extends Service {
     this.accepted = new Set(this.stashed)
     this.declined = new Set(this.externals)
 
-    await Promise.all([...this.stashed].map(async (filename) => {
-      const children = await this.getLinked(filename)
-      for (const filename of children) {
-        if (
-          this.accepted.has(filename) || this.declined.has(filename) ||
-          filename.includes('/node_modules/')
-        ) continue
-        pending.push(filename)
-      }
-    }))
+    await Promise.all(
+      [...this.stashed].map(async (filename) => {
+        const children = await this.getLinked(filename)
+        for (const filename of children) {
+          if (
+            this.accepted.has(filename) ||
+            this.declined.has(filename) ||
+            filename.includes('/node_modules/')
+          )
+            continue
+          pending.push(filename)
+        }
+      }),
+    )
 
     while (pending.length) {
-      let index = 0, hasUpdate = false
+      let index = 0,
+        hasUpdate = false
       while (index < pending.length) {
         const filename = pending[index]
         const children = await this.getLinked(filename)
-        let isDeclined = true, isAccepted = false
+        let isDeclined = true,
+          isAccepted = false
         for (const filename of children) {
           // ignore all declined children
           if (
-            this.declined.has(filename) || filename.includes('/node_modules/')
-          ) continue
+            this.declined.has(filename) ||
+            filename.includes('/node_modules/')
+          )
+            continue
           if (this.accepted.has(filename)) {
             // mark the module as accepted if any child is accepted
             isAccepted = true
@@ -246,7 +260,7 @@ class Hmr extends Service {
     for (const [job, plugin] of pending) {
       // check if it is a dependent of the changed file
       this.declined.delete(job.url)
-      const dependencies = [...await loadDependencies(job, this.declined)]
+      const dependencies = [...(await loadDependencies(job, this.declined))]
       this.declined.add(job.url)
 
       // we only detect reloads at plugin level
@@ -353,25 +367,27 @@ namespace Hmr {
     ignored: string[]
   }
 
-  export const Config: z<Config> = z.object({
-    base: z.string(),
-    root: z.union([
-      z.array(String).role('table'),
-      z.transform(String, (value) => [value]),
-    ]).default(['.']),
-    ignored: z.union([
-      z.array(String).role('table'),
-      z.transform(String, (value) => [value]),
-    ]).default([
-      '**/node_modules/**',
-      '**/.git/**',
-      '**/logs/**',
-    ]),
-    debounce: z.natural().role('ms').default(100),
-  }).i18n({
-    'en-US': enUS,
-    'zh-CN': zhCN,
-  })
+  export const Config: z<Config> = z
+    .object({
+      base: z.string(),
+      root: z
+        .union([
+          z.array(String).role('table'),
+          z.transform(String, (value) => [value]),
+        ])
+        .default(['.']),
+      ignored: z
+        .union([
+          z.array(String).role('table'),
+          z.transform(String, (value) => [value]),
+        ])
+        .default(['**/node_modules/**', '**/.git/**', '**/logs/**']),
+      debounce: z.natural().role('ms').default(100),
+    })
+    .i18n({
+      'en-US': enUS,
+      'zh-CN': zhCN,
+    })
 }
 
 export default Hmr

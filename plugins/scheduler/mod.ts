@@ -1,8 +1,8 @@
 import { type Context, Service } from '@cordisjs/core'
-import z from 'schemastery'
 import { Time } from 'cosmokit'
-import ScheduleState from './state/mod.ts'
+import z from 'schemastery'
 import { kScheduleState } from './mod.ts'
+import ScheduleState from './state/mod.ts'
 
 declare module '@cordisjs/core' {
   interface Context {
@@ -36,7 +36,8 @@ export class Scheduler extends Service {
 
     ctx.accessor('$scheduler', {
       get: () => this[kScheduleState],
-      set: (value: ScheduleState, receiver) => Reflect.set(this, kScheduleState, receiver),
+      set: (value: ScheduleState, receiver) =>
+        Reflect.set(this, kScheduleState, receiver),
     })
   }
 

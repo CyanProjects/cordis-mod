@@ -10,9 +10,7 @@
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
-  "files": [
-    "src"
-  ],
+  "files": ["src"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cordiverse/cordis.git",

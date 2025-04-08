@@ -1,8 +1,13 @@
-import { Awaitable, deepEqual, defineProperty, Promisify } from 'cosmokit'
+import {
+  type Awaitable,
+  type Promisify,
+  deepEqual,
+  defineProperty,
+} from 'cosmokit'
 import { Context } from './context.ts'
-import { EffectScope, ScopeStatus } from './scope.ts'
-import { symbols } from './utils.ts'
 import ReflectService from './reflect.ts'
+import { type EffectScope, ScopeStatus } from './scope.ts'
+import { symbols } from './utils.ts'
 
 export function isBailed(value: any) {
   return value !== null && value !== false && value !== undefined
@@ -10,7 +15,8 @@ export function isBailed(value: any) {
 
 export type Parameters<F> = F extends (...args: infer P) => any ? P : never
 export type ReturnType<F> = F extends (...args: any) => infer R ? R : never
-export type ThisType<F> = F extends (this: infer T, ...args: any) => any ? T
+export type ThisType<F> = F extends (this: infer T, ...args: any) => any
+  ? T
   : never
 export type GetEvents<C extends Context> = C[typeof Context.events]
 
@@ -107,78 +113,106 @@ class EventsService {
     )
 
     for (const level of ['info', 'error', 'warning']) {
-      ctx.scope.leak(this.on(`internal/${level}`, (format, ...param) => {
-        if (this._hooks[`internal/${level}`].length > 1) return
-        // eslint-disable-next-line no-console
-        console.info(format, ...param)
-      }))
+      ctx.scope.leak(
+        this.on(`internal/${level}`, (format, ...param) => {
+          if (this._hooks[`internal/${level}`].length > 1) return
+          // eslint-disable-next-line no-console
+          console.info(format, ...param)
+        }),
+      )
     }
 
     ctx.scope.leak(
-      this.on('internal/before-service', function (this: Context, name) {
-        for (const runtime of this.registry.values()) {
-          for (const scope of runtime.scopes) {
-            if (!scope.inject[name]?.required) continue
-            if (!this[symbols.filter](scope.ctx)) continue
-            scope.active = false
-          }
-        }
-      }, { global: true }),
-    )
-
-    ctx.scope.leak(this.on('internal/service', function (this: Context, name) {
-      for (const runtime of this.registry.values()) {
-        for (const scope of runtime.scopes) {
-          if (!scope.inject[name]?.required) continue
-          if (!this[symbols.filter](scope.ctx)) continue
-          scope.active = true
-        }
-      }
-    }, { global: true }))
-
-    ctx.scope.leak(this.on('internal/status', function (scope: EffectScope) {
-      if (scope.status !== ScopeStatus.ACTIVE) return
-      for (const key of Reflect.ownKeys(ctx[symbols.store])) {
-        const item = ctx[symbols.store][key as symbol]
-        if (item.source.scope !== scope) continue
-        if (item.value) {
-          item.source.emit(
-            item.source,
-            'internal/service',
-            item.name,
-            item.value,
-          )
-        }
-      }
-    }, { global: true }))
-
-    ctx.scope.leak(
-      this.on('internal/inject', function (this: Context, name, provider) {
-        const visited = new Set<string>()
-        let scope = this.scope
-        while (1) {
-          if (scope === provider) return true
-          for (const key in scope.inject ?? {}) {
-            if (visited.has(key)) continue
-            visited.add(key)
-            if (name === ReflectService.resolveInject(scope.ctx, key)[0]) {
-              return true
+      this.on(
+        'internal/before-service',
+        function (this: Context, name) {
+          for (const runtime of this.registry.values()) {
+            for (const scope of runtime.scopes) {
+              if (!scope.inject[name]?.required) continue
+              if (!this[symbols.filter](scope.ctx)) continue
+              scope.active = false
             }
           }
-          const next = scope.parent.scope
-          if (scope === next) break
-          scope = next
-        }
-        return false
-      }, { global: true }),
+        },
+        { global: true },
+      ),
     )
 
-    ctx.scope.leak(this.on('internal/update', (scope, config) => {
-      for (const acceptor of scope.acceptors) {
-        if (acceptor(scope, config)) return true
-      }
-      return deepEqual(scope.config, config)
-    }, { global: true }))
+    ctx.scope.leak(
+      this.on(
+        'internal/service',
+        function (this: Context, name) {
+          for (const runtime of this.registry.values()) {
+            for (const scope of runtime.scopes) {
+              if (!scope.inject[name]?.required) continue
+              if (!this[symbols.filter](scope.ctx)) continue
+              scope.active = true
+            }
+          }
+        },
+        { global: true },
+      ),
+    )
+
+    ctx.scope.leak(
+      this.on(
+        'internal/status',
+        (scope: EffectScope) => {
+          if (scope.status !== ScopeStatus.ACTIVE) return
+          for (const key of Reflect.ownKeys(ctx[symbols.store])) {
+            const item = ctx[symbols.store][key as symbol]
+            if (item.source.scope !== scope) continue
+            if (item.value) {
+              item.source.emit(
+                item.source,
+                'internal/service',
+                item.name,
+                item.value,
+              )
+            }
+          }
+        },
+        { global: true },
+      ),
+    )
+
+    ctx.scope.leak(
+      this.on(
+        'internal/inject',
+        function (this: Context, name, provider) {
+          const visited = new Set<string>()
+          let scope = this.scope
+          while (1) {
+            if (scope === provider) return true
+            for (const key in scope.inject ?? {}) {
+              if (visited.has(key)) continue
+              visited.add(key)
+              if (name === ReflectService.resolveInject(scope.ctx, key)[0]) {
+                return true
+              }
+            }
+            const next = scope.parent.scope
+            if (scope === next) break
+            scope = next
+          }
+          return false
+        },
+        { global: true },
+      ),
+    )
+
+    ctx.scope.leak(
+      this.on(
+        'internal/update',
+        (scope, config) => {
+          for (const acceptor of scope.acceptors) {
+            if (acceptor(scope, config)) return true
+          }
+          return deepEqual(scope.config, config)
+        },
+        { global: true },
+      ),
+    )
   }
 
   filterHooks(hooks: Hook[], thisArg?: object) {
@@ -189,9 +223,10 @@ class EventsService {
   }
 
   *dispatch(type: string, args: any[]) {
-    const thisArg = typeof args[0] === 'object' || typeof args[0] === 'function'
-      ? args.shift()
-      : null
+    const thisArg =
+      typeof args[0] === 'object' || typeof args[0] === 'function'
+        ? args.shift()
+        : null
     const name: string = args.shift()
     if (!name.startsWith('internal/')) {
       this.emit('internal/event', type, name, args, thisArg)
@@ -258,10 +293,9 @@ class EventsService {
     )
     if (result) return result
 
-    const hooks = this._hooks[name] ||= []
-    const label = typeof name === 'string'
-      ? `event <${name}>`
-      : 'event (Symbol)'
+    const hooks = (this._hooks[name] ||= [])
+    const label =
+      typeof name === 'string' ? `event <${name}>` : 'event (Symbol)'
     return this.register(label, hooks, listener, options)
   }
 
@@ -270,10 +304,14 @@ class EventsService {
     listener: (...args: any) => any,
     options?: boolean | EventOptions,
   ) {
-    const dispose = this.on(name, function (...args: any[]) {
-      dispose()
-      return listener.apply(this, args)
-    }, options)
+    const dispose = this.on(
+      name,
+      function (...args: any[]) {
+        dispose()
+        return listener.apply(this, args)
+      },
+      options,
+    )
     return dispose
   }
 }
@@ -281,8 +319,8 @@ class EventsService {
 export default EventsService
 
 export interface Events<in C extends Context = Context> {
-  'ready'(): Awaitable<void>
-  'dispose'(): Awaitable<void>
+  ready(): Awaitable<void>
+  dispose(): Awaitable<void>
   'internal/plugin'(scope: EffectScope<C>): void
   'internal/status'(scope: EffectScope<C>, oldValue: ScopeStatus): void
   'internal/info'(this: C, format: any, ...param: any[]): void

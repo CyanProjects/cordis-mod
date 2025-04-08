@@ -12,8 +12,6 @@
     "allowImportingTsExtensions": true,
     "strict": true,
     "noImplicitAny": false,
-    "types": [
-      "@types/node"
-    ]
+    "types": ["@types/node"]
   }
 }

@@ -1,11 +1,12 @@
-import { defineProperty, Dict } from 'cosmokit'
-import { Context } from './context.ts'
+import { type Dict, defineProperty } from 'cosmokit'
+import type { Context } from './context.ts'
 import { EffectScope } from './scope.ts'
 import { DisposableList, symbols, withProps } from './utils.ts'
 
 function isApplicable(object: Plugin) {
-  return object && typeof object === 'object' &&
-    typeof object.apply === 'function'
+  return (
+    object && typeof object === 'object' && typeof object.apply === 'function'
+  )
 }
 
 function buildOuterStack() {
@@ -16,10 +17,10 @@ function buildOuterStack() {
 export type Inject = string[] | Dict<Inject.Meta>
 
 export function Inject(inject: Inject) {
-  return function (
+  return (
     value: any,
     decorator: ClassDecoratorContext<any> | ClassMethodDecoratorContext<any>,
-  ) {
+  ) => {
     if (decorator.kind === 'class') {
       value.inject = inject
     } else if (decorator.kind === 'method') {
@@ -215,7 +216,7 @@ class Registry<C extends Context = Context> {
     if (!callback) {
       throw new Error(
         `invalid plugin, expect function or object with an "apply" method, received ${typeof plugin}`,
-        { cause: plugin }
+        { cause: plugin },
       )
     }
     this.ctx.scope.assertActive()

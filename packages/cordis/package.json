@@ -10,9 +10,7 @@
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
-  "files": [
-    "src"
-  ],
+  "files": ["src"],
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
   },
@@ -27,11 +25,7 @@
     "url": "https://github.com/cordiverse/cordis/issues"
   },
   "homepage": "https://github.com/cordiverse/cordis",
-  "keywords": [
-    "cordis",
-    "effect",
-    "framework"
-  ],
+  "keywords": ["cordis", "effect", "framework"],
   "dependencies": {
     "@cordisjs/core": "workspace:^",
     "@cordisjs/logger": "workspace:^",

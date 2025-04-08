@@ -3,11 +3,7 @@
   "private": true,
   "type": "module",
   "version": "0.0.0",
-  "workspaces": [
-    "external/*",
-    "packages/*",
-    "plugins/*"
-  ],
+  "workspaces": ["external/*", "packages/*", "plugins/*"],
   "license": "MIT",
   "scripts": {
     "yakumo": "node --import tsx scripts/yakumo.js",

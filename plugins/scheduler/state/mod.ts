@@ -1,8 +1,8 @@
 import type { Context } from '@cordisjs/core'
 import z from 'schemastery'
+import type { SchedulerState } from './base.ts'
 import Semaphore from './semaphore/mod.ts'
 import WorkSteal from './worksteal/mod.ts'
-import type { SchedulerState } from './base.ts'
 
 export const kScheduleState = Symbol.for('kra.scheduler.state')
 

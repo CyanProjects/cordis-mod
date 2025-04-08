@@ -7,7 +7,5 @@
     "noImplicitThis": false,
     "strictFunctionTypes": false
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

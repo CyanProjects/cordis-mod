@@ -1,4 +1,4 @@
-import { Context, Service } from '@cordisjs/core'
+import { type Context, Service } from '@cordisjs/core'
 
 declare module '@cordisjs/core' {
   interface Context {
@@ -93,7 +93,7 @@ export class TimerService extends Service {
     delay: number,
     noTrailing?: boolean,
   ): WithDispose<F> {
-    let lastCall = -Infinity
+    let lastCall = Number.NEGATIVE_INFINITY
     const execute = (...args: any[]) => {
       lastCall = Date.now()
       callback(...args)

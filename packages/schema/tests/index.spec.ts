@@ -1,5 +1,5 @@
-import { Context } from 'cordis'
 import assert from 'node:assert'
+import { Context } from 'cordis'
 // @ts-ignore
 import schema, { z } from '../src'
 

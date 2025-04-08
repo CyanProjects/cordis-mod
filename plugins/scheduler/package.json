@@ -1,6 +1,6 @@
 {
   "name": "cordis-plugin-scheduler",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "files": ["mod.ts", "utils.ts", "state.ts", "waiter.ts", "dist"],
   "type": "module",
   "license": "BSD-3-Clause",

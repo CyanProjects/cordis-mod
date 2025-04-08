@@ -1,6 +1,11 @@
-import { Awaitable, defineProperty } from 'cosmokit'
-import { Context } from './context.ts'
-import { createCallable, joinPrototype, symbols, Tracker } from './utils.ts'
+import { type Awaitable, defineProperty } from 'cosmokit'
+import type { Context } from './context.ts'
+import {
+  type Tracker,
+  createCallable,
+  joinPrototype,
+  symbols,
+} from './utils.ts'
 
 export abstract class Service<C extends Context = Context> {
   static readonly check: unique symbol = symbols.check as any
@@ -15,7 +20,10 @@ export abstract class Service<C extends Context = Context> {
 
   public name!: string
 
-  constructor(protected ctx: C, name: string) {
+  constructor(
+    protected ctx: C,
+    name: string,
+  ) {
     name ??= this.constructor['provide'] as string
 
     let self = this
@@ -44,8 +52,9 @@ export abstract class Service<C extends Context = Context> {
   }
 
   protected [symbols.filter](ctx: Context) {
-    return ctx[symbols.isolate][this.name] ===
-      this.ctx[symbols.isolate][this.name]
+    return (
+      ctx[symbols.isolate][this.name] === this.ctx[symbols.isolate][this.name]
+    )
   }
 
   protected [symbols.extend](props?: any) {

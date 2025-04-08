@@ -8,13 +8,13 @@ export class WorkerRef {
   constructor(
     public id: number,
     public queue: WorkQueue,
-    public state: Int32Array
+    public shared: Int32Array,
   ) {
     this.fate = new WorkerFate()
   }
 
   start() {
-    worker(this.id, Promise.resolve(this.fate), this.state, this.queue)
+    worker(this.id, Promise.resolve(this.fate), this.shared, this.queue)
     return this
   }
 }

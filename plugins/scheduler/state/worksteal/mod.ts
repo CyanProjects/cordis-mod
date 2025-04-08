@@ -1,25 +1,25 @@
 import type { Context } from '@cordisjs/core'
-import { type Callback, SchedulerState } from '../base.ts'
-import { WorkerFate } from './fate.ts'
-import { WorkerRef } from './state.ts'
-import { WorkQueue } from './queue.ts'
-import { TASK_NOTIFY } from './constants.ts'
-import { after } from '../../utils.ts'
 import { Tracker } from '../../tracker.ts'
+import { after } from '../../utils.ts'
+import { type Callback, SchedulerState } from '../base.ts'
+import { TASK_NOTIFY } from './constants.ts'
+import { WorkerFate } from './fate.ts'
+import { WorkQueue } from './queue.ts'
+import { WorkerRef } from './state.ts'
+import { Promisify } from 'cosmokit'
 
 export class WorkSteal extends SchedulerState {
   queue: WorkQueue = new WorkQueue()
   workers: WorkerRef[] = []
-  state: Int32Array = new Int32Array(new SharedArrayBuffer(4))
+  shared: Int32Array = new Int32Array(new SharedArrayBuffer(4))
 
   constructor(
     public ctx: Context,
-    public options: WorkSteal.Config
+    public options: WorkSteal.Config,
   ) {
     super()
-    this.workers = Array.from(
-      { length: this.options.cap },
-      (_, idx) => new WorkerRef(idx, this.queue, this.state).start()
+    this.workers = Array.from({ length: this.options.cap }, (_, idx) =>
+      new WorkerRef(idx, this.queue, this.shared).start(),
     )
   }
 
@@ -35,10 +35,13 @@ export class WorkSteal extends SchedulerState {
     } else {
       const diff = newCap - this.workers.length
       this.workers.push(
-        ...Array.from(
-          { length: diff },
-          (_, idx) => new WorkerRef(this.workers.length + idx, this.queue, this.state).start()
-        )
+        ...Array.from({ length: diff }, (_, idx) =>
+          new WorkerRef(
+            this.workers.length + idx,
+            this.queue,
+            this.shared,
+          ).start(),
+        ),
       )
     }
   }
@@ -68,33 +71,42 @@ export class WorkSteal extends SchedulerState {
       resolve()
       return Tracker.promise(after(period), 'WorkSteal::period@after')
     })
-    Atomics.notify(this.state, TASK_NOTIFY, 1)
+    Atomics.notify(this.shared, TASK_NOTIFY, 1)
 
     return promise
   }
 
-  completancy<T>(callback: Callback<T>): Promise<T> {
+  completancy<T>(callback: Callback<T>): Promisify<T> {
     const { promise, resolve, reject } = Promise.withResolvers<T>()
 
     this.queue.put(callback.name, () => {
-      return Tracker.promise(Promise.try(
-        Tracker.callback(callback, 'WorkSteal::completancy@callback')
-      ).then(resolve, reject), 'WorkSteal::completancy@Promise.try')
+      return Tracker.promise(
+        Promise.try(
+          Tracker.callback(callback, 'WorkSteal::completancy@callback'),
+        ).then(resolve, reject),
+        'WorkSteal::completancy@Promise.try',
+      )
     })
-    Atomics.notify(this.state, TASK_NOTIFY, 1)
+    Atomics.notify(this.shared, TASK_NOTIFY, 1)
 
-    return promise
+    return <Promisify<T>>promise
   }
 
   next(block: Promise<unknown>): Promise<void>
   next(tag: string, block: Promise<unknown>): Promise<void>
-  next(tagOrBlock: Promise<unknown> | string, maybeBlock?: Promise<unknown>): Promise<void> {
-    const block = Tracker.promise((() => {
-      if (Object.getPrototypeOf(tagOrBlock) === Promise.prototype) {
-        return <Promise<unknown>>tagOrBlock
-      }
-      return maybeBlock
-    })(), 'WorkSteal::next@promise')
+  next(
+    tagOrBlock: Promise<unknown> | string,
+    maybeBlock?: Promise<unknown>,
+  ): Promise<void> {
+    const block = Tracker.promise(
+      (() => {
+        if (Object.getPrototypeOf(tagOrBlock) === Promise.prototype) {
+          return <Promise<unknown>>tagOrBlock
+        }
+        return maybeBlock
+      })(),
+      'WorkSteal::next@promise',
+    )
     const tag = typeof tagOrBlock === 'string' ? tagOrBlock : undefined
 
     const { promise, resolve } = Promise.withResolvers<void>()
@@ -103,7 +115,7 @@ export class WorkSteal extends SchedulerState {
       resolve()
       return block
     })
-    Atomics.notify(this.state, TASK_NOTIFY, 1)
+    Atomics.notify(this.shared, TASK_NOTIFY, 1)
 
     return promise
   }

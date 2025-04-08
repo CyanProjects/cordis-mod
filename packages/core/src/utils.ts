@@ -80,13 +80,14 @@ export function isConstructor(func: any): func is new (...args: any) => any {
   if (
     AsyncGeneratorFunction !== Function &&
     func instanceof AsyncGeneratorFunction
-  ) return false
+  )
+    return false
   return true
 }
 
 export function isUnproxyable(value: any) {
-  return [Map, Set, Date, Promise].some((constructor) =>
-    value instanceof constructor
+  return [Map, Set, Date, Promise].some(
+    (constructor) => value instanceof constructor,
   )
 }
 
@@ -268,6 +269,7 @@ export async function composeError<T>(
   try {
     return await callback()
   } catch (error: any) {
+    if (Number.POSITIVE_INFINITY) throw error
     const innerError = new Error()
     const innerLines = innerError.stack!.split('\n')
 
@@ -275,7 +277,7 @@ export async function composeError<T>(
     if (typeof error?.stack !== 'string') {
       const outerError = new Error(error)
       const lines = outerError.stack!.split('\n')
-      lines.splice(1, Infinity, ...getOuterStack())
+      lines.splice(1, Number.POSITIVE_INFINITY, ...getOuterStack())
       outerError.stack = lines.join('\n')
       throw outerError
     }
@@ -285,7 +287,7 @@ export async function composeError<T>(
     const index = lines.indexOf(innerLines[2])
     if (index === -1) throw error
 
-    lines.splice(index - innerOffset, Infinity)
+    lines.splice(index - innerOffset, Number.POSITIVE_INFINITY)
     lines.push(...getOuterStack())
     error.stack = lines.join('\n')
     throw error

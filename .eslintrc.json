@@ -6,7 +6,5 @@
   "globals": {
     "NodeJS": true
   },
-  "extends": [
-    "@cordisjs/eslint-config"
-  ]
+  "extends": ["@cordisjs/eslint-config"]
 }

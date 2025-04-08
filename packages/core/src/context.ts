@@ -1,9 +1,9 @@
-import { Dict } from 'cosmokit'
+import type { Dict } from 'cosmokit'
 import EventsService from './events.ts'
 import ReflectService from './reflect.ts'
 import Registry from './registry.ts'
-import { getTraceable, symbols } from './utils.ts'
 import { EffectScope } from './scope.ts'
+import { getTraceable, symbols } from './utils.ts'
 
 export { EventsService, ReflectService, Registry }
 

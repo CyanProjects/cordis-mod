@@ -4,9 +4,7 @@
   "version": "1.0.0-alpha.0",
   "type": "module",
   "main": "src/index.ts",
-  "files": [
-    "src"
-  ],
+  "files": ["src"],
   "author": "Shigma <shigma10826@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -18,18 +16,10 @@
     "url": "https://github.com/cordiverse/cordis/issues"
   },
   "homepage": "https://github.com/cordiverse/cordis",
-  "keywords": [
-    "cordis",
-    "schema",
-    "service",
-    "plugin",
-    "config"
-  ],
+  "keywords": ["cordis", "schema", "service", "plugin", "config"],
   "cordis": {
     "service": {
-      "implements": [
-        "schema"
-      ]
+      "implements": ["schema"]
     }
   },
   "devDependencies": {
