@@ -1,5 +1,5 @@
 {
-  "name": "@cordisjs/logger",
+  "name": "@cordisjs/plugin-logger",
   "description": "Logger service for cordis",
   "version": "1.0.0-alpha.1",
   "type": "module",
