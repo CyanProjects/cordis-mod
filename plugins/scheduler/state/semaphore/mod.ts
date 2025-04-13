@@ -1,7 +1,7 @@
 import util from 'node:util'
 import type { Context } from '@cordisjs/core'
 import { symbols } from '@cordisjs/core'
-import type { Awaitable, Promisify } from 'cosmokit'
+import type { Promisify } from 'cosmokit'
 import z from 'schemastery'
 import { Tracker } from '../../tracker.ts'
 import { after } from '../../utils.ts'

@@ -8,14 +8,14 @@ export class WorkQueue extends List<WorkTask> {
     tag: string | undefined,
     fn: (...args: A[]) => Awaitable<R>,
     ...args: A[]
-  )
+  ): WorkTask
 
   put<R, A extends any[]>(
     tag: string | undefined,
     promise: Promise<unknown>,
     fn: (...args: A[]) => Awaitable<R>,
     ...args: A[]
-  )
+  ): WorkTask
 
   put(
     tag: string | undefined,
@@ -57,6 +57,9 @@ export class WorkTask<R = any, A extends any[] = any[]> extends Item {
   args: A[]
   promise?: Promise<unknown>
 
+  hasError = false
+  error?: unknown
+
   constructor(
     public tag: string | undefined,
     fn: (...args: A[]) => Awaitable<R>,
@@ -70,6 +73,16 @@ export class WorkTask<R = any, A extends any[] = any[]> extends Item {
   or(promise: Promise<unknown>) {
     this.promise = Tracker.promise(promise, 'worksteal::Queue::or@promise')
     return this
+  }
+
+  markError(reason?: unknown) {
+    this.hasError = true
+    this.error = reason
+  }
+
+  throwIfError() {
+    if (!this.hasError) return
+    throw this.error
   }
 
   call(): Promisify<R> {

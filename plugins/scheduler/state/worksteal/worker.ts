@@ -12,20 +12,20 @@ export async function worker(
   let { value: newTask } = Atomics.waitAsync(shared, TASK_NOTIFY, shared[0])
 
   while (await newTask) {
-    const task = queue.get()
-    await Tracker.promise(
-      task.call(),
-      'worksteal::worker::worker@task.call',
-      `worker-${id}`,
-    )
     switch (await decideMy(fate)) {
       case WorkerFate.KILL:
         return
       case WorkerFate.CONTINUE:
         break
     }
+    const task = queue.get()
+    await Tracker.promise(
+      task.call(),
+      'worksteal::worker::worker@task.call',
+      `worker-${id}`,
+    ).catch(reason => task.markError(reason))
     if (queue.has()) continue
     ;({ value: newTask } = Atomics.waitAsync(shared, TASK_NOTIFY, shared[0]))
   }
-  await fate
+  await decideMy(fate)
 }

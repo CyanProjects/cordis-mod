@@ -8,6 +8,8 @@ export class WorkerFate {
   #decision: Promise<symbol>
   #resolve: (decision: symbol) => void
 
+  #reflection: WorkerFate | null = null
+
   static decided(fate: WorkerFate | symbol) {
     if (typeof fate === 'symbol') return new WorkerFate(fate)
     return fate
@@ -21,17 +23,22 @@ export class WorkerFate {
   }
 
   async found(): Promise<symbol> {
+    const self = this.#reflection || this
+    if (self) return await self.#decision
     return await this.#decision
   }
 
   decide(decision: symbol, next?: Promise<WorkerFate>) {
-    this.#resolve(decision)
-    this.#nexted = next ?? Promise.resolve(this)
+    const self = this.#reflection || this
+    self.#resolve(decision)
+    if (next) self.#nexted = next
   }
 
   async next(): Promise<WorkerFate> {
-    await this.#decision
-    return this.#nexted || Promise.resolve(this)
+    const self = this.#reflection || this
+    await self.#decision
+    if (self.#nexted) this.#reflection = await self.#nexted
+    return self.#nexted || Promise.resolve(self)
   }
 }
 

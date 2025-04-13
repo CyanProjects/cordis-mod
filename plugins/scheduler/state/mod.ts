@@ -35,7 +35,7 @@ export namespace $ScheduleState {
   }
 
   export const Config: z<Config> = z.object({
-    mode: z.union(['work-steal', 'semaphore']).default('semaphore'),
+    mode: z.union(['work-steal', 'semaphore']).default('work-steal'),
     cap: z.number().min(1).max(99999),
     period: z.number().min(10).default(1000),
   })
