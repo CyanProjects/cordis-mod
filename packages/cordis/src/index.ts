@@ -1,4 +1,4 @@
-import {} from '@cordisjs/logger'
+import {} from '@cordisjs/plugin-logger'
 
 export * from '@cordisjs/core'
 
