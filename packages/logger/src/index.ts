@@ -58,14 +58,16 @@ class Logger extends Service {
       appLogger.warn(format, ...args)
     })
 
-    process.on('uncaughtException', (error) => {
-      appLogger.error(error)
-      process.exitCode = 1
-    })
+    if (typeof process !== 'undefined') {
+      process.on('uncaughtException', (error) => {
+        appLogger.error(error)
+        process.exitCode = 1
+      })
 
-    process.on('unhandledRejection', (error) => {
-      appLogger.warn(error)
-    })
+      process.on('unhandledRejection', (error) => {
+        appLogger.warn(error)
+      })
+    }
 
     let showTime = config.showTime
     if (showTime === true) showTime = 'yyyy-MM-dd hh:mm:ss'
