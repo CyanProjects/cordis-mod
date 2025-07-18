@@ -41,7 +41,7 @@ class Logger extends Service {
   buffer: Reggol.Record[] = []
 
   constructor(ctx: Context, config: Logger.Config = {}) {
-    ctx.provide('logger', void 0, true)
+    ctx.provide('logger', undefined, true)
     super(ctx, 'logger')
 
     const appLogger = new Reggol('app')

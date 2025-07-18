@@ -269,7 +269,6 @@ export async function composeError<T>(
   try {
     return await callback()
   } catch (error: any) {
-    if (Number.POSITIVE_INFINITY) throw error
     const innerError = new Error()
     const innerLines = innerError.stack!.split('\n')
 

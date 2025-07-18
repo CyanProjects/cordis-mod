@@ -1,9 +1,9 @@
-import { type Context, Service } from 'cordis'
+import { type Context, Service } from '@cordisjs/core'
 import type Schema from 'schemastery'
 
 export { default as Schema, default as z } from 'schemastery'
 
-declare module 'cordis' {
+declare module '@cordisjs/core' {
   interface Intercept {
     schema: Schema
   }

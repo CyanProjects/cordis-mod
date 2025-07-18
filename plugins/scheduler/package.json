@@ -1,6 +1,6 @@
 {
   "name": "cordis-plugin-scheduler",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "files": ["mod.ts", "utils.ts", "state.ts", "waiter.ts", "dist"],
   "type": "module",
   "license": "BSD-3-Clause",
@@ -29,6 +29,11 @@
   },
   "scripts": {
     "build": "tsc && bun build mod.ts state/mod.ts utils.ts --sourcemap=inline -e @cordisjs/core -e cosmokit -e schemastery -e linked-list --outdir dist/"
+  },
+  "dkms": {
+    "name": "build:mod",
+    "watch": ["./state/**", "./mod.ts", "./utils.ts", "./tracker.ts"],
+    "script": "build"
   },
   "cordis": {
     "service": {

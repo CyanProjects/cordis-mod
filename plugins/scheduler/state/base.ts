@@ -1,4 +1,4 @@
-import { symbols } from '@cordisjs/core'
+import { CordisError, symbols } from '@cordisjs/core'
 import type { Promisify } from 'cosmokit'
 import { Tracker } from '../tracker.ts'
 import { withRetry } from '../utils.ts'
@@ -20,14 +20,22 @@ export abstract class SchedulerState {
   abstract get cap(): number
   abstract set cap(newCap: number)
 
-  withRetry: typeof withRetry = function $withRetry(fn, tries, wait) {
+  withRetry: typeof withRetry = function $withRetry(fn, tries, options) {
+    options ??= {}
+    const wait = options?.wait || Tracker.callback(
+      this.period.bind(this),
+      'SchedulerState::withRetry@wait',
+    )
     return withRetry(
       fn,
       tries,
-      Tracker.callback(
-        wait ?? this.period.bind(this),
-        'SchedulerState::withRetry@wait',
-      ),
+      {
+        wait,
+        intercept: Tracker.callback((err) => {
+          if (CordisError.isError(err)) return true // do not retry CordisError
+          return options.intercept?.(err)
+        }, 'SchedulerState::withRetry@intercept')
+      },
     )
   }
 
